@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portofolio Tugas Kelas 11 - Arsip & Penampungan PR</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f4f7f5; color: #2c3e35; }
+        .card-hover:hover { transform: translateY(-4px); box-shadow: 0 12px 28px -6px rgba(53, 94, 59, 0.12); }
+        .mint-gradient { background: linear-gradient(135deg, #2d5a44 0%, #40795c 100%); }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Header / Hero Section (Soft Mint / Chinese Tea Green Theme) -->
+    <header class="mint-gradient text-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center">
+            <div>
+                <span class="bg-[#5a9c78] text-white text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider">Portofolio Kelas 11</span>
+                <h1 class="text-3xl font-bold mt-2">Arsip & Penampungan Tugas PR</h1>
+                <p class="text-[#d0e8dc] mt-1">Solusi hemat storage (Excel + GitHub Pages & External Hosting)</p>
+            </div>
+            <div class="mt-4 md:mt-0 flex gap-3">
+                <button onclick="openGuideModal()" class="bg-[#35684d] hover:bg-[#28503b] border border-[#528d6f] text-white px-4 py-2 rounded-xl text-sm font-medium transition flex items-center gap-2">
+                    <i class="fa-solid fa-book-open"></i> Panduan Excel
+                </button>
+                <button onclick="toggleFullscreen()" class="bg-[#214332] hover:bg-[#183124] text-white px-4 py-2 rounded-xl text-sm font-medium transition flex items-center gap-2">
+                    <i class="fa-solid fa-expand"></i> Full Screen
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8 flex-grow w-full">
+        
+        <!-- Controls: Search & Category Filters -->
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-[#e1eae4] mb-8">
+            <div class="flex flex-col md:flex-row gap-4 justify-between items-center">
+                <!-- Search Bar -->
+                <div class="w-full md:w-1/3 relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-[#729e85]">
+                        <i class="fa-solid fa-search"></i>
+                    </span>
+                    <input type="text" id="searchInput" onkeyup="filterAssignments()" placeholder="Cari judul tugas, deskripsi..." class="w-full pl-10 pr-4 py-2.5 bg-[#f8faf8] border border-[#d2e2d8] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#40795c] text-sm text-[#2c3e35]">
+                </div>
+
+                <!-- Category / Group Filter Tabs -->
+                <div class="flex flex-wrap gap-2 w-full md:w-auto justify-start md:justify-end">
+                    <button onclick="filterGroup('ALL')" id="btn-ALL" class="filter-group-btn px-4 py-2 rounded-xl text-sm font-medium bg-[#40795c] text-white transition">Semua Mapel</button>
+                    <button onclick="filterGroup('Wajib')" id="btn-Wajib" class="filter-group-btn px-4 py-2 rounded-xl text-sm font-medium bg-[#edf4f0] text-[#40795c] hover:bg-[#e2ede7] transition">Mapel Wajib</button>
+                    <button onclick="filterGroup('Pilihan')" id="btn-Pilihan" class="filter-group-btn px-4 py-2 rounded-xl text-sm font-medium bg-[#edf4f0] text-[#40795c] hover:bg-[#e2ede7] transition">Mapel Pilihan</button>
+                </div>
+            </div>
+
+            <!-- Subject Dropdown Filter -->
+            <div class="mt-4 pt-4 border-t border-[#edf4f0] flex flex-wrap gap-2 items-center">
+                <span class="text-xs font-semibold text-[#618a73] uppercase tracking-wider mr-2">Pilih Mata Pelajaran:</span>
+                <select id="subjectSelect" onchange="filterAssignments()" class="bg-[#f8faf8] border border-[#d2e2d8] text-[#2c3e35] text-sm rounded-xl px-3 py-2 focus:ring-[#40795c] focus:border-[#40795c]">
+                    <option value="">-- Semua Mata Pelajaran --</option>
+                    <optgroup label="Mapel Wajib">
+                        <option value="PKN">PKN</option>
+                        <option value="Bahasa Indonesia">Bahasa Indonesia</option>
+                        <option value="Bahasa Inggris">Bahasa Inggris</option>
+                        <option value="Sejarah">Sejarah</option>
+                        <option value="Seni Budaya">Seni Budaya</option>
+                        <option value="Matematika Umum">Matematika Umum</option>
+                        <option value="Agama Kristen (Pa-K)">Agama Kristen (Pa-K)</option>
+                        <option value="Bimbingan Konseling (BK)">Bimbingan Konseling (BK)</option>
+                    </optgroup>
+                    <optgroup label="Mapel Pilihan">
+                        <option value="Geografi">Geografi</option>
+                        <option value="Matematika Tingkat Lanjut">Matematika Tingkat Lanjut</option>
+                        <option value="Bahasa Inggris Tingkat Lanjut">Bahasa Inggris Tingkat Lanjut</option>
+                        <option value="Informatika">Informatika</option>
+                    </optgroup>
+                </select>
+                <button onclick="resetFilters()" class="text-xs text-[#40795c] hover:underline font-semibold ml-auto"><i class="fa-solid fa-rotate-right"></i> Reset Filter</button>
+            </div>
+        </div>
+
+        <!-- Cards Grid Container -->
+        <div id="assignmentGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Populated via JS -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="hidden text-center py-16">
+            <div class="text-[#96bc9e] text-5xl mb-4"><i class="fa-solid fa-folder-open"></i></div>
+            <h3 class="text-lg font-medium text-[#3b5e4a]">Tidak ada tugas yang ditemukan</h3>
+            <p class="text-[#729e85] text-sm mt-1">Coba ubah kata kunci pencarian atau filter mata pelajaran.</p>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-[#e1eae4] mt-12 py-6 text-center text-xs text-[#618a73]">
+        <p>Portofolio Kelas 11 &bull; Tema Soft Mint / Chinese Green &bull; Hemat Google Drive Storage</p>
+    </footer>
+
+    <!-- Media Modal -->
+    <div id="mediaModal" class="fixed inset-0 bg-black/75 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden shadow-2xl relative">
+            <div class="px-6 py-4 bg-[#214332] text-white flex justify-between items-center">
+                <h3 id="modalTitle" class="font-semibold text-lg truncate">Preview Tugas</h3>
+                <button onclick="closeModal()" class="text-[#a4c9b4] hover:text-white text-xl p-1"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div id="modalBody" class="p-6 overflow-y-auto flex-grow flex items-center justify-center bg-[#182e22]">
+                <!-- Dynamic Content -->
+            </div>
+            <div class="px-6 py-3 bg-[#f4f7f5] border-t border-[#e1eae4] flex justify-between items-center">
+                <span id="modalMeta" class="text-xs text-[#618a73]"></span>
+                <div class="flex gap-2">
+                    <a id="modalDownloadBtn" href="#" target="_blank" class="bg-[#40795c] hover:bg-[#325f48] text-white px-4 py-2 rounded-xl text-sm font-medium transition flex items-center gap-2">
+                        <i class="fa-solid fa-download"></i> Download File
+                    </a>
+                    <button onclick="closeModal()" class="bg-[#d2e2d8] hover:bg-[#c0d4c7] text-[#2c3e35] px-4 py-2 rounded-xl text-sm font-medium transition">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Guide Modal -->
+    <div id="guideModal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl p-6">
+            <div class="flex justify-between items-center mb-4 pb-2 border-b border-[#edf4f0]">
+                <h3 class="text-xl font-bold text-[#2c3e35]"><i class="fa-solid fa-book-open text-[#40795c] mr-2"></i> Panduan Excel + GitHub</h3>
+                <button onclick="closeGuideModal()" class="text-[#729e85] hover:text-[#2c3e35] text-xl"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="space-y-4 text-sm text-[#476654] leading-relaxed">
+                <div class="bg-[#edf4f0] border-l-4 border-[#40795c] p-4 rounded-r-xl">
+                    <h4 class="font-semibold text-[#214332] mb-1">Kenapa cara ini menghemat Google Drive?</h4>
+                    <p>File tugas (gambar, PDF, video, PPTX) di-upload ke penampungan gratis luar (Imgur, Catbox.moe, GitHub). Kamu cukup memasukkan link-nya ke dalam daftar tugas di bawah atau tabel Excel.</p>
+                </div>
+                
+                <h4 class="font-bold text-[#2c3e35] mt-4">Cara Memasukkan Data Tugas:</h4>
+                <ol class="list-decimal pl-5 space-y-2">
+                    <li>Upload file tugasmu ke penampungan gratis dan salin link-nya.</li>
+                    <li>Buka file <code>index.html</code> ini menggunakan Text Editor (Notepad / VS Code).</li>
+                    <li>Cari bagian <code>const assignmentsData = [...]</code> di bawah kode JavaScript.</li>
+                    <li>Tambahkan atau edit data tugas sesuai format yang ada, lalu save dan upload ulang ke GitHub-mu!</li>
+                </ol>
+            </div>
+            <div class="mt-6 text-right">
+                <button onclick="closeGuideModal()" class="bg-[#40795c] hover:bg-[#325f48] text-white px-5 py-2 rounded-xl text-sm font-medium">Mengerti</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Data and Logic -->
+    <script>
+        // DATA TUGAS (Tersinkron dengan data Excel/JSON-mu)
+        const assignmentsData = [
+            {
+                id: 1,
+                group: "Wajib",
+                subject: "Informatika",
+                title: "Praktikum Algoritma Pemrograman Python",
+                category: "Pilihan",
+                description: "Membuat program kalkulator sederhana dan laporan praktikum.",
+                date: "2026-08-15",
+                fileType: "pdf",
+                fileUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf"
+            },
+            {
+                id: 2,
+                group: "Wajib",
+                subject: "Bahasa Inggris",
+                title: "Analytical Exposition Presentation",
+                category: "Wajib",
+                description: "Presentasi materi isu lingkungan hidup dan file PPTX.",
+                date: "2026-08-20",
+                fileType: "pptx",
+                fileUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf"
+            },
+            {
+                id: 3,
+                group: "Wajib",
+                subject: "Seni Budaya",
+                title: "Karya Seni Lukis Kanvas",
+                category: "Wajib",
+                description: "Dokumentasi foto hasil lukisan ekspresi abstrak.",
+                date: "2026-08-10",
+                fileType: "image",
+                fileUrl: "https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=800&q=80"
+            },
+            {
+                id: 4,
+                group: "Pilihan",
+                subject: "Geografi",
+                title: "Analisis Pola Keruangan Desa Kota",
+                category: "Pilihan",
+                description: "Video penjelasan hasil observasi lapangan tata guna lahan.",
+                date: "2026-08-05",
+                fileType: "video",
+                fileUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4"
+            }
+        ];
+
+        let currentFilterGroup = 'ALL';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderAssignments(assignmentsData);
+        });
+
+        function renderAssignments(data) {
+            const grid = document.getElementById('assignmentGrid');
+            const emptyState = document.getElementById('emptyState');
+            grid.innerHTML = '';
+
+            if (data.length === 0) {
+                emptyState.classList.remove('hidden');
+                return;
+            } else {
+                emptyState.classList.add('hidden');
+            }
+
+            data.forEach(item => {
+                let badgeBg = item.category === 'Wajib' ? 'bg-[#e2ede7] text-[#2d5a44]' : 'bg-[#eef4ed] text-[#3b6e51]';
+                let iconClass = getFileIcon(item.fileType);
+
+                const card = document.createElement('div');
+                card.className = 'bg-white rounded-2xl shadow-sm border border-[#e1eae4] overflow-hidden card-hover transition flex flex-col justify-between';
+                card.innerHTML = `
+                    <div class="p-6">
+                        <div class="flex justify-between items-start mb-3">
+                            <span class="text-xs font-semibold px-3 py-1 rounded-full ${badgeBg}">${item.category}: ${item.subject}</span>
+                            <span class="text-xs text-[#729e85] flex items-center gap-1"><i class="fa-regular fa-calendar"></i> ${item.date}</span>
+                        </div>
+                        <h3 class="font-bold text-lg text-[#2c3e35] mb-2">${item.title}</h3>
+                        <p class="text-[#527863] text-sm line-clamp-3 mb-4">${item.description}</p>
+                    </div>
+                    <div class="px-6 py-4 bg-[#f8faf8] border-t border-[#edf4f0] flex items-center justify-between">
+                        <span class="text-xs font-semibold text-[#527863] uppercase flex items-center gap-1.5">
+                            <i class="${iconClass} text-[#40795c]"></i> ${item.fileType}
+                        </span>
+                        <div class="flex gap-2">
+                            <button onclick="openMediaModal(${item.id})" class="bg-[#40795c] hover:bg-[#325f48] text-white px-3.5 py-1.5 rounded-xl text-xs font-medium transition flex items-center gap-1.5">
+                                <i class="fa-solid fa-eye"></i> Lihat & Zoom
+                            </button>
+                            <a href="${item.fileUrl}" target="_blank" download class="bg-[#e2ede7] hover:bg-[#d2e2d8] text-[#2d5a44] px-3 py-1.5 rounded-xl text-xs font-medium transition flex items-center gap-1.5" title="Download">
+                                <i class="fa-solid fa-download"></i>
+                            </a>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function getFileIcon(type) {
+            switch(type.toLowerCase()) {
+                case 'pdf': return 'fa-solid fa-file-pdf text-[#c05648]';
+                case 'pptx': return 'fa-solid fa-file-powerpoint text-[#d67a3f]';
+                case 'image': case 'png': case 'jpg': return 'fa-solid fa-file-image text-[#40795c]';
+                case 'video': case 'mp4': return 'fa-solid fa-file-video text-[#3b719e]';
+                default: return 'fa-solid fa-file-lines';
+            }
+        }
+
+        function filterGroup(group) {
+            currentFilterGroup = group;
+            document.querySelectorAll('.filter-group-btn').forEach(btn => {
+                btn.classList.remove('bg-[#40795c]', 'text-white');
+                btn.classList.add('bg-[#edf4f0]', 'text-[#40795c]');
+            });
+            const activeBtn = document.getElementById(`btn-${group}`);
+            activeBtn.classList.remove('bg-[#edf4f0]', 'text-[#40795c]');
+            activeBtn.classList.add('bg-[#40795c]', 'text-white');
+
+            filterAssignments();
+        }
+
+        function filterAssignments() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const subject = document.getElementById('subjectSelect').value;
+
+            const filtered = assignmentsData.filter(item => {
+                const matchGroup = (currentFilterGroup === 'ALL') || (item.category === currentFilterGroup);
+                const matchSubject = (subject === '') || (item.subject.toLowerCase() === subject.toLowerCase());
+                const matchSearch = item.title.toLowerCase().includes(search) || item.description.toLowerCase().includes(search) || item.subject.toLowerCase().includes(search);
+                return matchGroup && matchSubject && matchSearch;
+            });
+
+            renderAssignments(filtered);
+        }
+
+        function resetFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('subjectSelect').value = '';
+            filterGroup('ALL');
+        }
+
+        function openMediaModal(id) {
+            const item = assignmentsData.find(i => i.id === id);
+            if (!item) return;
+
+            document.getElementById('modalTitle').innerText = `${item.subject} - ${item.title}`;
+            document.getElementById('modalMeta').innerText = `Tanggal: ${item.date} | Kategori: ${item.category}`;
+            document.getElementById('modalDownloadBtn').href = item.fileUrl;
+
+            const modalBody = document.getElementById('modalBody');
+            modalBody.innerHTML = '';
+
+            if (item.fileType === 'image' || item.fileType === 'png' || item.fileType === 'jpg') {
+                modalBody.innerHTML = `
+                    <div class="relative overflow-auto max-h-[70vh] flex items-center justify-center w-full">
+                        <img src="${item.fileUrl}" alt="${item.title}" class="max-h-[65vh] object-contain rounded-xl transition-transform duration-300 hover:scale-105 cursor-zoom-in" id="zoomableImage" onclick="toggleZoom(this)">
+                    </div>
+                    <p class="text-xs text-[#8fb9a1] mt-2 text-center"><i class="fa-solid fa-magnifying-glass"></i> Klik gambar untuk memperbesar / zoom.</p>
+                `;
+            } else if (item.fileType === 'video' || item.fileType === 'mp4') {
+                modalBody.innerHTML = `
+                    <div class="w-full max-h-[65vh] flex items-center justify-center">
+                        <video controls class="max-h-[60vh] w-auto rounded-xl shadow-lg">
+                            <source src="${item.fileUrl}" type="video/mp4">
+                            Browser Anda tidak mendukung pemutaran video.
+                        </video>
+                    </div>
+                `;
+            } else if (item.fileType === 'pdf') {
+                modalBody.innerHTML = `
+                    <div class="w-full h-[65vh] flex flex-col items-center justify-center bg-[#182e22] rounded-xl">
+                        <i class="fa-solid fa-file-pdf text-[#e06d60] text-6xl mb-3"></i>
+                        <p class="text-white font-medium mb-2">Dokumen PDF Siap Ditampilkan / Diunduh</p>
+                        <iframe src="${item.fileUrl}" class="w-full h-[50vh] rounded-lg border border-[#2d5a44] bg-white"></iframe>
+                    </div>
+                `;
+            } else {
+                modalBody.innerHTML = `
+                    <div class="text-center py-12 text-[#8fb9a1]">
+                        <i class="fa-solid fa-file-arrow-down text-5xl mb-3"></i>
+                        <p class="text-white font-medium">File tipe ${item.fileType.toUpperCase()} dapat diunduh langsung melalui tombol di bawah.</p>
+                    </div>
+                `;
+            }
+
+            document.getElementById('mediaModal').classList.remove('hidden');
+        }
+
+        let isZoomed = false;
+        function toggleZoom(img) {
+            isZoomed = !isZoomed;
+            if (isZoomed) {
+                img.style.transform = 'scale(1.8)';
+                img.style.cursor = 'zoom-out';
+            } else {
+                img.style.transform = 'scale(1)';
+                img.style.cursor = 'zoom-in';
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('mediaModal').classList.add('hidden');
+            isZoomed = false;
+        }
+
+        function openGuideModal() {
+            document.getElementById('guideModal').classList.remove('hidden');
+        }
+
+        function closeGuideModal() {
+            document.getElementById('guideModal').classList.add('hidden');
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+    </script>
+</body>
+</html>
