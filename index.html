@@ -516,12 +516,10 @@ function normalizeType(tipe, url){
 function escapeHtml(s){
   return (s||"").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
-function orderedSubjects(kelompok, subjectsPresent){
+function orderedSubjects(kelompok){
   const base = kelompok === "wajib" ? WAJIB_ORDER : PILIHAN_ORDER;
-  const extras = subjectsPresent.filter(s => !base.includes(s));
-  return [...base.filter(s => subjectsPresent.includes(s)), ...extras];
+  return base;
 }
-
 /* ============================================================
    FETCH DATA
    ============================================================ */
@@ -617,26 +615,21 @@ function renderSubjects(){
   sub.textContent = 'Pilih mata pelajaran untuk melihat kumpulan tugasnya';
 
   const rows = state.all.filter(r => r.kelompok === state.kelompok);
-  const present = [...new Set(rows.map(r => r.mapel))];
-  const list = orderedSubjects(state.kelompok, present);
+  const list = orderedSubjects(state.kelompok);
 
   const grid = document.getElementById('subject-grid');
-  if(list.length === 0){
-    grid.innerHTML = `<div class="state-box" style="grid-column:1/-1;"><div class="spinner"></div>Memuat data mata pelajaran…</div>`;
-    return;
-  }
   grid.innerHTML = list.map(subj => {
     const count = rows.filter(r => r.mapel === subj).length;
     const icon = SUBJECT_ICONS[subj] || "📚";
+    const countLabel = count === 0 ? "Belum ada tugas diupload" : count + " tugas";
     return `
       <div class="subject-card" onclick="showTasks('${subj.replace(/'/g,"\\'")}')">
         <div class="subject-icon">${icon}</div>
         <h4>${escapeHtml(subj)}</h4>
-        <span class="subject-count">${count} tugas</span>
+        <span class="subject-count">${countLabel}</span>
       </div>`;
   }).join('');
 }
-
 /* ============================================================
    RENDER: TASK GRID
    ============================================================ */
@@ -659,9 +652,12 @@ function renderTasks(rebuildFilter){
   const filterVal = document.getElementById('type-filter').value || "all";
   if(filterVal !== "all") rows = rows.filter(r => r.tipe === filterVal);
 
-  const grid = document.getElementById('task-grid');
+   const grid = document.getElementById('task-grid');
   if(rows.length === 0){
-    grid.innerHTML = `<div class="state-box" style="grid-column:1/-1;"><div class="icon">🍃</div>Belum ada tugas untuk mapel / filter ini.</div>`;
+    const msg = filterVal === 'all'
+      ? 'Belum ada tugas diupload untuk mata pelajaran ini.'
+      : 'Belum ada tugas dengan tipe file ini.';
+    grid.innerHTML = `<div class="state-box" style="grid-column:1/-1;"><div class="icon">🍃</div>${msg}</div>`;
     return;
   }
 
