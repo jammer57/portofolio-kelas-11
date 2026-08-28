@@ -437,6 +437,24 @@ main{ position:relative; z-index:2; max-width:1180px; margin:0 auto; padding:10p
 .modal-fallback{ color:var(--mint-100); text-align:center; padding:40px; font-size:13.5px; }
 .modal-fallback a{ color:var(--gold-light); font-weight:600; }
 
+/* Layar penuh untuk preview (docx/xlsx/pdf/dll jadi lega dilihat) */
+.modal-panel:fullscreen,
+.modal-panel:-webkit-full-screen{
+  max-width:100vw; max-height:100vh; width:100vw; height:100vh; border-radius:0;
+}
+.modal-panel:fullscreen .modal-body,
+.modal-panel:-webkit-full-screen .modal-body{ min-height:0; }
+.modal-panel:fullscreen .modal-body iframe,
+.modal-panel:fullscreen .modal-body video,
+.modal-panel:fullscreen .zoom-wrap,
+.modal-panel:fullscreen .modal-body .carousel-track,
+.modal-panel:-webkit-full-screen .modal-body iframe,
+.modal-panel:-webkit-full-screen .modal-body video,
+.modal-panel:-webkit-full-screen .zoom-wrap,
+.modal-panel:-webkit-full-screen .modal-body .carousel-track{
+  height:100% !important;
+}
+
 /* --- Zoom & pan untuk gambar di modal (support HP: pinch + drag,
        laptop: scroll wheel + klik + drag) --- */
 .zoom-wrap{
@@ -564,9 +582,12 @@ footer.site-footer{
 <!-- ===================== MODAL VIEWER ===================== -->
 <div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this) closeModal()">
   <div class="modal-panel">
-    <div class="modal-head">
+      <div class="modal-head">
       <h4 id="modal-title">Judul Tugas</h4>
-      <button class="modal-close" onclick="closeModal()">✕</button>
+      <div style="display:flex; gap:8px; flex:0 0 auto;">
+        <button class="modal-close" id="modal-fullscreen-btn" onclick="toggleFullscreen()" aria-label="Layar penuh" title="Layar penuh">⛶</button>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
     </div>
     <div class="modal-body" id="modal-body"></div>
     <div class="modal-foot">
@@ -718,11 +739,13 @@ function loadData(){
         .map(r => {
           const urls = parseUrls(r["Url"]);
           const tipeRaw = r["Tipe File"] || "";
-          const items = urls.map(u => {
+                    const tipeHints = parseUrls(tipeRaw); // boleh diisi banyak, dipisah koma, urutan harus sama kek Url
+          const items = urls.map((u, i) => {
             const drive = driveInfo(u);
+            const hint = tipeHints[i] || tipeHints[0] || "";
             // link Drive nyaris tidak pernah punya ekstensi di URL-nya,
             // jadi tipe filenya diambil dari hint kolom "Tipe File"
-            const tipe = drive ? normalizeType(tipeRaw, "") : detectUrlType(u, tipeRaw);
+            const tipe = drive ? normalizeType(hint, "") : detectUrlType(u, hint);
             return { url: u, tipe, drive };
           });
           const distinctTypes = [...new Set(items.map(it => it.tipe))];
@@ -1066,11 +1089,34 @@ function modalCarouselMove(btn, dir){
 }
 
 function closeModal(){
+  if(document.fullscreenElement || document.webkitFullscreenElement){
+    (document.exitFullscreen || document.webkitExitFullscreen || function(){}).call(document);
+  }
   document.getElementById('modal-overlay').classList.remove('active');
   document.getElementById('modal-body').innerHTML = '';
   document.body.style.overflow = '';
 }
 document.addEventListener('keydown', e => { if(e.key === 'Escape') closeModal(); });
+
+function toggleFullscreen(){
+  const panel = document.querySelector('.modal-panel');
+  if(!panel) return;
+  const isFs = document.fullscreenElement || document.webkitFullscreenElement;
+  if(!isFs){
+    (panel.requestFullscreen || panel.webkitRequestFullscreen || function(){}).call(panel);
+  } else {
+    (document.exitFullscreen || document.webkitExitFullscreen || function(){}).call(document);
+  }
+}
+function updateFullscreenIcon(){
+  const btn = document.getElementById('modal-fullscreen-btn');
+  if(!btn) return;
+  const isFs = document.fullscreenElement || document.webkitFullscreenElement;
+  btn.textContent = isFs ? '⤢' : '⛶';
+  btn.setAttribute('aria-label', isFs ? 'Keluar layar penuh' : 'Layar penuh');
+}
+document.addEventListener('fullscreenchange', updateFullscreenIcon);
+document.addEventListener('webkitfullscreenchange', updateFullscreenIcon);
 
 /* ============================================================
    ZOOM & PAN GAMBAR DI MODAL
