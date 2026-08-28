@@ -16,11 +16,25 @@
      sebagai CSV (lihat konstanta SHEET_URL di bagian <script> bawah).
   4. Kolom sheet yang dipakai (harus persis ada, urutan bebas):
      No | Kelompok | Mata Pelajaran | Judul Tugas | Deskripsi | Tanggal | Tipe File | Url
-     - Kelompok  : isi "Wajib" atau "Pilihan"
-     - Tipe File : isi salah satu -> Gambar / PDF / PPTX / MP4
+     - Kelompok  : isi "Wajib" atau "Pilihan" (bebas besar/kecil huruf,
+                   asal mengandung kata "wajib" atau "pilih")
+     - Tipe File : isi salah satu -> Gambar / PDF / PPTX / MP4 (bebas
+                   besar/kecil huruf). Ini cuma dipakai sebagai HINT
+                   kalau linknya tidak punya ekstensi yang jelas.
      - Url       : link file dari hosting luar (imgur, dsb) — JANGAN
                    pakai Google Drive supaya kuota drive tetap hemat.
-  5. Tidak perlu server tambahan — murni HTML+CSS+JS statis.
+                   BISA DIISI LEBIH DARI SATU FILE, pisahkan dengan
+                   KOMA. Boleh campur gambar + video + pdf + pptx
+                   dalam satu baris/tugas, nanti otomatis jadi
+                   carousel dengan tombol panah di satu kartu.
+                   Contoh: https://x.com/a.jpg,https://x.com/b.mp4
+     - Tanggal   : kalau dikosongin, otomatis diisi tanggal hari ini
+                   saat halaman dibuka.
+  5. Mata Pelajaran wajib ditulis PERSIS (case-sensitive) sesuai daftar
+     di WAJIB_ORDER / PILIHAN_ORDER di bagian <script> supaya dapat
+     ikon yang sesuai. Kalau beda dikit, tugasnya tetap masuk hitungan
+     mapel "Lainnya"/default, jadi usahakan sama persis.
+  6. Tidak perlu server tambahan — murni HTML+CSS+JS statis.
   ================================================================
 -->
 
@@ -285,7 +299,7 @@ main{ position:relative; z-index:2; max-width:1180px; margin:0 auto; padding:10p
 .task-preview img, .task-preview video{ width:100%; height:100%; object-fit:cover; }
 .task-preview .file-icon{ font-size:52px; opacity:.9; }
 .type-badge{
-  position:absolute; top:10px; left:10px; z-index:2;
+  position:absolute; top:10px; left:10px; z-index:6;
   font-size:10.5px; font-weight:700; letter-spacing:.3px;
   color:#fff; background:rgba(11,70,48,.75); backdrop-filter:blur(4px);
   padding:4px 10px; border-radius:999px; border:1px solid rgba(255,255,255,.25);
@@ -311,6 +325,34 @@ main{ position:relative; z-index:2; max-width:1180px; margin:0 auto; padding:10p
 .btn-primary:hover{ filter:brightness(1.08); }
 .btn-ghost{ background:var(--mint-100); color:var(--jade-800); border-color:var(--jade-300); }
 .btn-ghost:hover{ background:var(--mint-200); }
+
+/* =================== CAROUSEL (multi-file 1 kartu) =================== */
+.carousel-track{ position:relative; width:100%; height:100%; }
+.carousel-slide{ position:absolute; inset:0; opacity:0; z-index:0; transition:opacity .25s ease; display:flex; align-items:center; justify-content:center; }
+.carousel-slide.active{ opacity:1; z-index:1; }
+.carousel-slide img, .carousel-slide video{ width:100%; height:100%; object-fit:cover; }
+.carousel-slide .file-icon{ font-size:44px; opacity:.9; color:#fff; }
+.slide-badge{
+  position:absolute; bottom:8px; left:8px; z-index:6;
+  font-size:9.5px; font-weight:700; letter-spacing:.3px;
+  color:#fff; background:rgba(11,70,48,.75); backdrop-filter:blur(4px);
+  padding:3px 8px; border-radius:999px; border:1px solid rgba(255,255,255,.25);
+}
+.carousel-arrow{
+  position:absolute; top:50%; transform:translateY(-50%); z-index:7;
+  width:28px; height:28px; border-radius:50%;
+  background:rgba(11,70,48,.65); color:#fff; border:1px solid rgba(255,255,255,.35);
+  display:flex; align-items:center; justify-content:center; font-size:15px;
+}
+.carousel-arrow:hover{ background:rgba(11,70,48,.9); }
+.carousel-arrow.prev{ left:8px; }
+.carousel-arrow.next{ right:8px; }
+.carousel-dots{
+  position:absolute; bottom:8px; left:0; right:0; z-index:6;
+  display:flex; justify-content:center; gap:5px;
+}
+.carousel-dots span{ width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,.5); }
+.carousel-dots span.active{ background:#fff; }
 
 /* =================== EMPTY / LOADING =================== */
 .state-box{
@@ -356,6 +398,7 @@ main{ position:relative; z-index:2; max-width:1180px; margin:0 auto; padding:10p
 .modal-body{
   flex:1; overflow:auto; background:#0f1c16;
   display:flex; align-items:center; justify-content:center; min-height:220px;
+  position:relative;
 }
 .modal-body img{
   max-width:100%; max-height:78vh; object-fit:contain; cursor:zoom-in; transition:transform .25s ease;
@@ -363,6 +406,9 @@ main{ position:relative; z-index:2; max-width:1180px; margin:0 auto; padding:10p
 .modal-body img.zoomed{ cursor:zoom-out; transform:scale(1.7); }
 .modal-body video{ width:100%; max-height:78vh; background:#000; }
 .modal-body iframe{ width:100%; height:78vh; border:none; background:#fff; }
+.modal-body .carousel-track{ width:100%; height:78vh; }
+.modal-body .carousel-slide{ position:absolute; inset:0; }
+.modal-body .carousel-slide iframe{ height:100%; }
 .modal-fallback{ color:var(--mint-100); text-align:center; padding:40px; font-size:13.5px; }
 .modal-fallback a{ color:var(--gold-light); font-weight:600; }
 
@@ -487,8 +533,8 @@ const SUBJECT_ICONS = {
   "Bimbingan Konseling (BK)":"🧭", "Geografi":"🗺️", "Matematika Tingkat Lanjut":"📐",
   "Bahasa Inggris Tingkat Lanjut":"🌐", "Informatika":"💻"
 };
-const TYPE_ICONS = { image:"🖼️", video:"🎬", pdf:"📄", pptx:"📊", other:"📁" };
-const TYPE_LABELS = { image:"Gambar", video:"Video / MP4", pdf:"PDF", pptx:"PPTX", other:"File" };
+const TYPE_ICONS = { image:"🖼️", video:"🎬", pdf:"📄", pptx:"📊", mixed:"🗂️", other:"📁" };
+const TYPE_LABELS = { image:"Gambar", video:"Video / MP4", pdf:"PDF", pptx:"PPTX", mixed:"Campuran", other:"File" };
 
 /* ============================================================
    STATE
@@ -504,6 +550,8 @@ function normalizeKelompok(v){
   if(v.includes("pilih")) return "pilihan";
   return "wajib";
 }
+
+/* Deteksi tipe file umum berdasar teks hint kolom "Tipe File" */
 function normalizeType(tipe, url){
   const t = (tipe||"").toLowerCase();
   const u = (url||"").toLowerCase();
@@ -513,20 +561,41 @@ function normalizeType(tipe, url){
   if(t.includes("gambar") || t.includes("foto") || t.includes("image") || t.includes("png") || t.includes("jpg") || t.includes("jpeg") || u.match(/\.(png|jpe?g|gif|webp)$/)) return "image";
   return "other";
 }
-function escapeHtml(s){
-  return (s||"").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* Deteksi tipe PER-LINK, diutamakan dari ekstensi URL-nya sendiri.
+   Kalau linknya tidak punya ekstensi (misal hosting tanpa .jpg/.mp4),
+   baru pakai hint dari kolom "Tipe File" sebagai fallback. */
+function detectUrlType(url, tipeHint){
+  const u = (url||"").toLowerCase();
+  if(u.match(/\.pdf(\?|$)/)) return "pdf";
+  if(u.match(/\.(pptx|ppt)(\?|$)/)) return "pptx";
+  if(u.match(/\.(mp4|webm|mov)(\?|$)/)) return "video";
+  if(u.match(/\.(png|jpe?g|gif|webp)(\?|$)/)) return "image";
+  return normalizeType(tipeHint, "");
 }
-function orderedSubjects(kelompok){
-  const base = kelompok === "wajib" ? WAJIB_ORDER : PILIHAN_ORDER;
-  return base;
+
+/* Pecah kolom Url yang berisi banyak link dipisah koma */
+function parseUrls(raw){
+  return (raw||"").split(",").map(s => s.trim()).filter(Boolean);
 }
-  function todayFormatted(){
+
+function todayFormatted(){
   const d = new Date();
   const dd = String(d.getDate()).padStart(2, '0');
   const mm = String(d.getMonth() + 1).padStart(2, '0');
   const yyyy = d.getFullYear();
   return `${dd}/${mm}/${yyyy}`;
 }
+
+function escapeHtml(s){
+  return (s||"").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+/* Semua mapel di kelompok ini selalu ditampilkan, walau belum ada tugasnya */
+function orderedSubjects(kelompok){
+  return kelompok === "wajib" ? WAJIB_ORDER : PILIHAN_ORDER;
+}
+
 /* ============================================================
    FETCH DATA
    ============================================================ */
@@ -538,19 +607,30 @@ function loadData(){
     transformHeader: h => h.trim(),
     transform: v => (typeof v === "string" ? v.trim() : v),
     complete: (res) => {
-           state.all = res.data
+      state.all = res.data
         .filter(r => r["Judul Tugas"])
-        .map(r => ({
-          no: r["No"] || "",
-          kelompok: normalizeKelompok(r["Kelompok"]),
-          mapel: r["Mata Pelajaran"] || "Lainnya",
-          judul: r["Judul Tugas"] || "Tanpa Judul",
-          deskripsi: r["Deskripsi"] || "",
-          tanggal: r["Tanggal"] || todayFormatted(),
-          tipeRaw: r["Tipe File"] || "",
-          url: r["Url"] || ""
-        }))
-        .map(r => ({ ...r, tipe: normalizeType(r.tipeRaw, r.url) }));
+        .map(r => {
+          const urls = parseUrls(r["Url"]);
+          const tipeRaw = r["Tipe File"] || "";
+          const items = urls.map(u => ({ url: u, tipe: detectUrlType(u, tipeRaw) }));
+          const distinctTypes = [...new Set(items.map(it => it.tipe))];
+          const dominantTipe = items.length === 0
+            ? normalizeType(tipeRaw, "")
+            : (distinctTypes.length > 1 ? "mixed" : distinctTypes[0]);
+          return {
+            no: r["No"] || "",
+            kelompok: normalizeKelompok(r["Kelompok"]),
+            mapel: r["Mata Pelajaran"] || "Lainnya",
+            judul: r["Judul Tugas"] || "Tanpa Judul",
+            deskripsi: r["Deskripsi"] || "",
+            tanggal: r["Tanggal"] || todayFormatted(),
+            tipeRaw: tipeRaw,
+            url: urls[0] || "",
+            urls: urls,
+            items: items,
+            tipe: dominantTipe
+          };
+        });
       updateHomeCounts();
       // Jika sedang berada di layar subjek/tugas, refresh tampilan
       if(document.getElementById('screen-subjects').classList.contains('active')) renderSubjects();
@@ -613,7 +693,7 @@ function showTasks(subject){
 }
 
 /* ============================================================
-   RENDER: SUBJECT GRID
+   RENDER: SUBJECT GRID (selalu tampilkan semua mapel)
    ============================================================ */
 function renderSubjects(){
   const title = document.getElementById('subjects-title');
@@ -637,6 +717,7 @@ function renderSubjects(){
       </div>`;
   }).join('');
 }
+
 /* ============================================================
    RENDER: TASK GRID
    ============================================================ */
@@ -659,7 +740,7 @@ function renderTasks(rebuildFilter){
   const filterVal = document.getElementById('type-filter').value || "all";
   if(filterVal !== "all") rows = rows.filter(r => r.tipe === filterVal);
 
-   const grid = document.getElementById('task-grid');
+  const grid = document.getElementById('task-grid');
   if(rows.length === 0){
     const msg = filterVal === 'all'
       ? 'Belum ada tugas diupload untuk mata pelajaran ini.'
@@ -668,14 +749,9 @@ function renderTasks(rebuildFilter){
     return;
   }
 
-  grid.innerHTML = rows.map((r, i) => {
+  grid.innerHTML = rows.map((r) => {
     const idx = state.all.indexOf(r);
-    let previewHtml = `<div class="file-icon">${TYPE_ICONS[r.tipe]}</div>`;
-    if(r.tipe === 'image' && r.url){
-      previewHtml = `<img src="${escapeHtml(r.url)}" loading="lazy" alt="${escapeHtml(r.judul)}">`;
-    } else if(r.tipe === 'video' && r.url){
-      previewHtml = `<video src="${escapeHtml(r.url)}" muted loop playsinline preload="metadata" class="autovid"></video>`;
-    }
+    const previewHtml = buildCardPreview(r);
     return `
       <div class="task-card">
         <div class="task-preview">
@@ -697,6 +773,53 @@ function renderTasks(rebuildFilter){
   setupAutoplayObserver();
 }
 
+/* Bikin satu ikon/thumbnail untuk sebuah item (dipakai di kartu preview) */
+function cardSlideMedia(item, judul){
+  if(item.tipe === 'image'){
+    return `<img src="${escapeHtml(item.url)}" loading="lazy" alt="${escapeHtml(judul)}">`;
+  }
+  if(item.tipe === 'video'){
+    return `<video src="${escapeHtml(item.url)}" muted loop playsinline preload="metadata" class="autovid"></video>`;
+  }
+  // pdf / pptx / other -> tidak bisa dithumbnail kecil, tampilkan ikon
+  return `<div class="file-icon">${TYPE_ICONS[item.tipe]}</div>`;
+}
+
+/* Bangun preview kartu: satu media biasa, atau carousel kalau item > 1 */
+function buildCardPreview(r){
+  const items = r.items && r.items.length ? r.items : [];
+  if(items.length === 0) return `<div class="file-icon">${TYPE_ICONS[r.tipe]}</div>`;
+
+  if(items.length === 1){
+    return cardSlideMedia(items[0], r.judul);
+  }
+
+  const slides = items.map((it,i) => `
+    <div class="carousel-slide${i===0?' active':''}" data-slide="${i}">
+      ${cardSlideMedia(it, r.judul)}
+      <span class="slide-badge">${TYPE_ICONS[it.tipe]} ${i+1}/${items.length}</span>
+    </div>`).join('');
+  const dots = items.map((_,i) => `<span class="${i===0?'active':''}" data-dot="${i}"></span>`).join('');
+
+  return `
+    <div class="carousel-track" data-carousel>
+      ${slides}
+      <button class="carousel-arrow prev" onclick="event.stopPropagation(); moveCarousel(this,-1)">‹</button>
+      <button class="carousel-arrow next" onclick="event.stopPropagation(); moveCarousel(this,1)">›</button>
+      <div class="carousel-dots">${dots}</div>
+    </div>`;
+}
+
+function moveCarousel(btn, dir){
+  const track = btn.closest('[data-carousel]');
+  const slides = [...track.querySelectorAll('.carousel-slide')];
+  const dots = [...track.querySelectorAll('[data-dot]')];
+  let cur = slides.findIndex(s => s.classList.contains('active'));
+  slides[cur].classList.remove('active'); if(dots[cur]) dots[cur].classList.remove('active');
+  cur = (cur + dir + slides.length) % slides.length;
+  slides[cur].classList.add('active'); if(dots[cur]) dots[cur].classList.add('active');
+}
+
 /* Autoplay video hanya saat kartu terlihat di layar (hemat performa) */
 function setupAutoplayObserver(){
   const vids = document.querySelectorAll('.autovid');
@@ -716,35 +839,80 @@ function setupAutoplayObserver(){
 /* ============================================================
    MODAL VIEWER
    ============================================================ */
+/* Bikin isi 1 slide modal sesuai tipe item-nya */
+function modalSlideContent(item, judul){
+  if(item.tipe === 'image'){
+    return `<img src="${escapeHtml(item.url)}" alt="${escapeHtml(judul)}" onclick="this.classList.toggle('zoomed')">`;
+  }
+  if(item.tipe === 'video'){
+    return `<video src="${escapeHtml(item.url)}" controls playsinline></video>`;
+  }
+  if(item.tipe === 'pdf'){
+    return `<iframe src="${escapeHtml(item.url)}"></iframe>`;
+  }
+  if(item.tipe === 'pptx'){
+    const officeSrc = "https://view.officeapps.live.com/op/embed.aspx?src=" + encodeURIComponent(item.url);
+    return `<iframe src="${officeSrc}"></iframe>`;
+  }
+  return `<div class="modal-fallback">Format file tidak dikenali untuk pratinjau.<br><a href="${escapeHtml(item.url)}" target="_blank" rel="noopener">Buka file di tab baru →</a></div>`;
+}
+
 function openModal(idx){
   const r = state.all[idx];
   if(!r) return;
   document.getElementById('modal-title').textContent = r.judul;
   document.getElementById('modal-meta').innerHTML =
     `<b>${escapeHtml(r.mapel)}</b> · 🗓️ ${escapeHtml(r.tanggal)}<br>${escapeHtml(r.deskripsi)}`;
+
+  const items = r.items && r.items.length ? r.items : [];
   const dl = document.getElementById('modal-download');
-  dl.href = r.url || '#';
+  dl.href = items[0] ? items[0].url : '#';
 
   const body = document.getElementById('modal-body');
-  if(!r.url){
+
+  if(items.length === 0){
     body.innerHTML = `<div class="modal-fallback">Belum ada file yang ditautkan untuk tugas ini.</div>`;
-  } else if(r.tipe === 'image'){
-    body.innerHTML = `<img src="${escapeHtml(r.url)}" alt="${escapeHtml(r.judul)}" onclick="this.classList.toggle('zoomed')">`;
-  } else if(r.tipe === 'video'){
-    body.innerHTML = `<video src="${escapeHtml(r.url)}" controls autoplay loop playsinline></video>`;
-  } else if(r.tipe === 'pdf'){
-    body.innerHTML = `<iframe src="${escapeHtml(r.url)}"></iframe>`;
-  } else if(r.tipe === 'pptx'){
-    const officeSrc = "https://view.officeapps.live.com/op/embed.aspx?src=" + encodeURIComponent(r.url);
-    body.innerHTML = `<iframe src="${officeSrc}"></iframe>
-      <div class="modal-fallback" style="position:absolute;bottom:8px;">Jika pratinjau tidak muncul, pastikan link file bersifat publik, atau gunakan tombol Unduh.</div>`;
+  } else if(items.length === 1){
+    body.innerHTML = modalSlideContent(items[0], r.judul);
+    if(items[0].tipe === 'video'){
+      const v = body.querySelector('video');
+      if(v){ v.autoplay = true; v.loop = true; }
+    }
   } else {
-    body.innerHTML = `<div class="modal-fallback">Format file tidak dikenali untuk pratinjau.<br><a href="${escapeHtml(r.url)}" target="_blank" rel="noopener">Buka file di tab baru →</a></div>`;
+    const slides = items.map((it,i) => `
+      <div class="carousel-slide${i===0?' active':''}" data-slide="${i}">
+        ${modalSlideContent(it, r.judul)}
+        <span class="slide-badge">${TYPE_ICONS[it.tipe]} ${TYPE_LABELS[it.tipe]} · ${i+1}/${items.length}</span>
+      </div>`).join('');
+    const dots = items.map((_,i) => `<span class="${i===0?'active':''}" data-dot="${i}"></span>`).join('');
+    body.innerHTML = `
+      <div class="carousel-track" data-carousel>
+        ${slides}
+        <button class="carousel-arrow prev" onclick="modalCarouselMove(this,-1)">‹</button>
+        <button class="carousel-arrow next" onclick="modalCarouselMove(this,1)">›</button>
+        <div class="carousel-dots">${dots}</div>
+      </div>`;
   }
 
   document.getElementById('modal-overlay').classList.add('active');
   document.body.style.overflow = 'hidden';
 }
+
+/* Sama seperti moveCarousel, tapi juga update tombol Unduh & pause video slide lama */
+function modalCarouselMove(btn, dir){
+  const track = btn.closest('[data-carousel]');
+  const slides = [...track.querySelectorAll('.carousel-slide')];
+  const dots = [...track.querySelectorAll('[data-dot]')];
+  let cur = slides.findIndex(s => s.classList.contains('active'));
+
+  const oldVid = slides[cur].querySelector('video');
+  if(oldVid) oldVid.pause();
+
+  slides[cur].classList.remove('active'); if(dots[cur]) dots[cur].classList.remove('active');
+  cur = (cur + dir + slides.length) % slides.length;
+  slides[cur].classList.add('active'); if(dots[cur]) dots[cur].classList.add('active');
+}
+
 function closeModal(){
   document.getElementById('modal-overlay').classList.remove('active');
   document.getElementById('modal-body').innerHTML = '';
