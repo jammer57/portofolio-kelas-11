@@ -135,6 +135,26 @@ a{color:inherit;}
   backdrop-filter:blur(10px);
   border-bottom:1px solid rgba(15,92,63,.14);
 }
+  
+  .running-bar{
+  background:linear-gradient(90deg, var(--jade-800), var(--jade-700));
+  overflow:hidden; white-space:nowrap; position:relative; z-index:15;
+  border-bottom:1px solid rgba(201,162,75,.4);
+}
+.running-track{
+  display:inline-block; padding-left:100%;
+  animation: runningText 18s linear infinite;
+}
+.running-track span{
+  color:#EAFBF1; font-size:12.5px; font-weight:600; letter-spacing:.3px;
+  padding:8px 0; display:inline-block;
+}
+@keyframes runningText{
+  from{ transform:translateX(0); }
+  to{ transform:translateX(-100%); }
+}
+  
+.brand{ display:flex; align-items:center; gap:12px; cursor:pointer; }
 .brand{ display:flex; align-items:center; gap:12px; cursor:pointer; }
 .seal{
   width:38px; height:38px; flex:0 0 auto;
@@ -146,6 +166,7 @@ a{color:inherit;}
   box-shadow: var(--shadow);
   transform:rotate(-4deg);
 }
+  
 .brand-text{ display:flex; flex-direction:column; line-height:1.1; }
 .brand-text b{ font-family:var(--font-display); font-size:17px; color:var(--jade-900); letter-spacing:.3px; }
 .brand-text span{ font-size:11px; color:var(--ink-soft); letter-spacing:.5px; }
@@ -408,6 +429,7 @@ main{ position:relative; z-index:2; max-width:1180px; margin:0 auto; padding:10p
   position:relative;
 }
 .modal-body video{ width:100%; max-height:78vh; background:#000; }
+.modal-body audio{ width:90%; max-width:520px; }
 .modal-body iframe{ width:100%; height:78vh; border:none; background:#fff; }
 .modal-body .carousel-track{ width:100%; height:78vh; }
 .modal-body .carousel-slide{ position:absolute; inset:0; }
@@ -476,8 +498,13 @@ footer.site-footer{
   <nav class="breadcrumb" id="breadcrumb"></nav>
 </header>
 
-<main>
+<div class="running-bar">
+  <div class="running-track">
+    <span>⚠️ Jangan lupa di refresh jika ada bug &nbsp;&nbsp;•&nbsp;&nbsp; ⚠️ Jangan lupa di refresh jika ada bug &nbsp;&nbsp;•&nbsp;&nbsp; ⚠️ Jangan lupa di refresh jika ada bug &nbsp;&nbsp;•&nbsp;&nbsp;</span>
+  </div>
+</div>
 
+<main>
   <!-- ===================== SCREEN 1: HOME ===================== -->
   <section id="screen-home" class="screen active">
     <div class="hero">
@@ -573,8 +600,8 @@ const SUBJECT_ICONS = {
 
 /* Tambah xlsx & docx di sini -> otomatis dapat ikon, label, dan
    filter dropdown yang sesuai di seluruh halaman. */
-const TYPE_ICONS  = { image:"🖼️", video:"🎬", pdf:"📄", pptx:"📽️", xlsx:"📊", docx:"📝", mixed:"🗂️", other:"📁" };
-const TYPE_LABELS = { image:"Gambar", video:"Video / MP4", pdf:"PDF", pptx:"PowerPoint (PPTX)", xlsx:"Excel (XLSX)", docx:"Word (DOCX)", mixed:"Campuran", other:"File" };
+const TYPE_ICONS  = { image:"🖼️", video:"🎬", audio:"🎵", pdf:"📄", pptx:"📽️", xlsx:"📊", docx:"📝", txt:"📃", csv:"📈", zip:"🗜️", mixed:"🗂️", other:"📁" };
+const TYPE_LABELS = { image:"Gambar", video:"Video / MP4", audio:"Audio", pdf:"PDF", pptx:"PowerPoint (PPTX)", xlsx:"Excel (XLSX)", docx:"Word (DOCX)", txt:"Teks (TXT)", csv:"CSV", zip:"ZIP/Arsip", mixed:"Campuran", other:"File" };
 
 /* ============================================================
    STATE
@@ -600,8 +627,12 @@ function normalizeType(tipe, url){
   if(t.includes("ppt") || t.includes("slide") || u.match(/\.pptx?$/)) return "pptx";
   if(t.includes("xlsx") || t.includes("excel") || t.includes("spreadsheet") || u.match(/\.xlsx?$/)) return "xlsx";
   if(t.includes("doc") || t.includes("word") || u.match(/\.docx?$/)) return "docx";
-  if(t.includes("mp4") || t.includes("video") || u.match(/\.(mp4|webm|mov)$/)) return "video";
-  if(t.includes("gambar") || t.includes("foto") || t.includes("image") || t.includes("png") || t.includes("jpg") || t.includes("jpeg") || u.match(/\.(png|jpe?g|gif|webp)$/)) return "image";
+  if(t.includes("csv") || u.match(/\.csv$/)) return "csv";
+  if(t.includes("txt") || t.includes("teks") || t.includes("text") || u.match(/\.txt$/)) return "txt";
+  if(t.includes("zip") || t.includes("rar") || t.includes("arsip") || u.match(/\.(zip|rar|7z)$/)) return "zip";
+  if(t.includes("mp3") || t.includes("audio") || t.includes("lagu") || u.match(/\.(mp3|wav|ogg|m4a)$/)) return "audio";
+  if(t.includes("mp4") || t.includes("video") || u.match(/\.(mp4|webm|mov|mkv)$/)) return "video";
+  if(t.includes("gambar") || t.includes("foto") || t.includes("image") || t.includes("png") || t.includes("jpg") || t.includes("jpeg") || u.match(/\.(png|jpe?g|gif|webp|svg|bmp)$/)) return "image";
   return "other";
 }
 
@@ -614,8 +645,12 @@ function detectUrlType(url, tipeHint){
   if(u.match(/\.(pptx|ppt)(\?|$)/)) return "pptx";
   if(u.match(/\.(xlsx|xls)(\?|$)/)) return "xlsx";
   if(u.match(/\.(docx|doc)(\?|$)/)) return "docx";
-  if(u.match(/\.(mp4|webm|mov)(\?|$)/)) return "video";
-  if(u.match(/\.(png|jpe?g|gif|webp)(\?|$)/)) return "image";
+  if(u.match(/\.csv(\?|$)/)) return "csv";
+  if(u.match(/\.txt(\?|$)/)) return "txt";
+  if(u.match(/\.(zip|rar|7z)(\?|$)/)) return "zip";
+  if(u.match(/\.(mp3|wav|ogg|m4a)(\?|$)/)) return "audio";
+  if(u.match(/\.(mp4|webm|mov|mkv)(\?|$)/)) return "video";
+  if(u.match(/\.(png|jpe?g|gif|webp|svg|bmp)(\?|$)/)) return "image";
   return normalizeType(tipeHint, "");
 }
 
@@ -944,8 +979,11 @@ function modalSlideContent(item, judul){
       </div>
     </div>`;
   }
-  if(item.tipe === 'video'){
+   if(item.tipe === 'video'){
     return `<video src="${escapeHtml(item.url)}" controls playsinline></video>`;
+  }
+  if(item.tipe === 'audio'){
+    return `<audio src="${escapeHtml(item.url)}" controls></audio>`;
   }
   if(item.tipe === 'pdf'){
     return `<iframe src="${escapeHtml(item.url)}"></iframe>`;
@@ -954,9 +992,16 @@ function modalSlideContent(item, judul){
     const officeSrc = "https://view.officeapps.live.com/op/embed.aspx?src=" + encodeURIComponent(item.url);
     return `<iframe src="${officeSrc}"></iframe>`;
   }
-  return `<div class="modal-fallback">Format file tidak dikenali untuk pratinjau.<br><a href="${escapeHtml(item.url)}" target="_blank" rel="noopener">Buka file di tab baru →</a></div>`;
+  if(item.tipe === 'txt'){
+    return `<iframe src="${escapeHtml(item.url)}"></iframe>`;
+  }
+  if(item.tipe === 'csv'){
+    const gviewSrc = "https://docs.google.com/viewer?url=" + encodeURIComponent(item.url) + "&embedded=true";
+    return `<iframe src="${gviewSrc}"></iframe>`;
+  }
+  return `<div class="modal-fallback">Format file ini (${TYPE_LABELS[item.tipe]||'tidak dikenal'}) belum bisa dipratinjau langsung.<br><a href="${escapeHtml(item.url)}" target="_blank" rel="noopener">Buka / unduh file di tab baru →</a></div>`;
 }
-
+  
 function openModal(idx){
   const r = state.all[idx];
   if(!r) return;
@@ -1048,7 +1093,7 @@ function applyZoomFromData(img){
 }
 
 function setImgScale(img, scale){
-  scale = Math.min(5, Math.max(1, scale));
+  scale = Math.min(12, Math.max(1, scale));
   img.dataset.scale = scale;
   if(scale === 1){ img.dataset.tx = 0; img.dataset.ty = 0; }
   applyZoomFromData(img);
