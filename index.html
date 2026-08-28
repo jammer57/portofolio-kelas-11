@@ -18,23 +18,29 @@
      No | Kelompok | Mata Pelajaran | Judul Tugas | Deskripsi | Tanggal | Tipe File | Url
      - Kelompok  : isi "Wajib" atau "Pilihan" (bebas besar/kecil huruf,
                    asal mengandung kata "wajib" atau "pilih")
-     - Tipe File : isi salah satu -> Gambar / PDF / PPTX / MP4 (bebas
-                   besar/kecil huruf). Ini cuma dipakai sebagai HINT
-                   kalau linknya tidak punya ekstensi yang jelas.
-     - Url       : link file dari hosting luar (imgur, dsb) — JANGAN
-                   pakai Google Drive supaya kuota drive tetap hemat.
-                   BISA DIISI LEBIH DARI SATU FILE, pisahkan dengan
-                   KOMA. Boleh campur gambar + video + pdf + pptx
-                   dalam satu baris/tugas, nanti otomatis jadi
-                   carousel dengan tombol panah di satu kartu.
-                   Contoh: https://x.com/a.jpg,https://x.com/b.mp4
+     - Tipe File : isi salah satu -> Gambar / PDF / PPTX / XLSX / DOCX / MP4
+                   (bebas besar/kecil huruf). Ini dipakai sebagai HINT
+                   kalau linknya tidak punya ekstensi jelas (mis. link
+                   Google Drive).
+     - Url       : link file dari hosting luar (imgur, dsb) ATAU link
+                   Google Drive (drive.google.com / docs.google.com —
+                   otomatis dideteksi & dibuatkan preview + tombol
+                   unduh yang benar). BISA DIISI LEBIH DARI SATU FILE,
+                   pisahkan dengan KOMA, boleh campur tipe file dalam
+                   satu baris/tugas — otomatis jadi carousel dengan
+                   tombol panah di satu kartu.
+                   Contoh: https://x.com/a.jpg,https://drive.google.com/file/d/FILEID/view
      - Tanggal   : kalau dikosongin, otomatis diisi tanggal hari ini
                    saat halaman dibuka.
-  5. Mata Pelajaran wajib ditulis PERSIS (case-sensitive) sesuai daftar
+  5. Tipe file yang didukung untuk PRATINJAU (bukan cuma unduh):
+     Gambar, Video (MP4), PDF, PPTX, XLSX, DOCX, dan link Google Drive
+     apa pun (Drive punya viewer bawaan yang bisa render hampir semua
+     jenis file, jadi ini pilihan paling hemat & paling kompatibel).
+  6. Mata Pelajaran wajib ditulis PERSIS (case-sensitive) sesuai daftar
      di WAJIB_ORDER / PILIHAN_ORDER di bagian <script> supaya dapat
      ikon yang sesuai. Kalau beda dikit, tugasnya tetap masuk hitungan
      mapel "Lainnya"/default, jadi usahakan sama persis.
-  6. Tidak perlu server tambahan — murni HTML+CSS+JS statis.
+  7. Tidak perlu server tambahan — murni HTML+CSS+JS statis.
   ================================================================
 -->
 
@@ -328,8 +334,8 @@ main{ position:relative; z-index:2; max-width:1180px; margin:0 auto; padding:10p
 
 /* =================== CAROUSEL (multi-file 1 kartu) =================== */
 .carousel-track{ position:relative; width:100%; height:100%; }
-.carousel-slide{ position:absolute; inset:0; opacity:0; z-index:0; transition:opacity .25s ease; display:flex; align-items:center; justify-content:center; }
-.carousel-slide.active{ opacity:1; z-index:1; }
+.carousel-slide{ position:absolute; inset:0; opacity:0; z-index:0; transition:opacity .25s ease; display:flex; align-items:center; justify-content:center; pointer-events:none; }
+.carousel-slide.active{ opacity:1; z-index:1; pointer-events:auto; }
 .carousel-slide img, .carousel-slide video{ width:100%; height:100%; object-fit:cover; }
 .carousel-slide .file-icon{ font-size:44px; opacity:.9; color:#fff; }
 .slide-badge{
@@ -339,7 +345,7 @@ main{ position:relative; z-index:2; max-width:1180px; margin:0 auto; padding:10p
   padding:3px 8px; border-radius:999px; border:1px solid rgba(255,255,255,.25);
 }
 .carousel-arrow{
-  position:absolute; top:50%; transform:translateY(-50%); z-index:7;
+  position:absolute; top:50%; transform:translateY(-50%); z-index:8;
   width:28px; height:28px; border-radius:50%;
   background:rgba(11,70,48,.65); color:#fff; border:1px solid rgba(255,255,255,.35);
   display:flex; align-items:center; justify-content:center; font-size:15px;
@@ -350,6 +356,7 @@ main{ position:relative; z-index:2; max-width:1180px; margin:0 auto; padding:10p
 .carousel-dots{
   position:absolute; bottom:8px; left:0; right:0; z-index:6;
   display:flex; justify-content:center; gap:5px;
+  pointer-events:none;
 }
 .carousel-dots span{ width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,.5); }
 .carousel-dots span.active{ background:#fff; }
@@ -400,10 +407,6 @@ main{ position:relative; z-index:2; max-width:1180px; margin:0 auto; padding:10p
   display:flex; align-items:center; justify-content:center; min-height:220px;
   position:relative;
 }
-.modal-body img{
-  max-width:100%; max-height:78vh; object-fit:contain; cursor:zoom-in; transition:transform .25s ease;
-}
-.modal-body img.zoomed{ cursor:zoom-out; transform:scale(1.7); }
 .modal-body video{ width:100%; max-height:78vh; background:#000; }
 .modal-body iframe{ width:100%; height:78vh; border:none; background:#fff; }
 .modal-body .carousel-track{ width:100%; height:78vh; }
@@ -411,6 +414,40 @@ main{ position:relative; z-index:2; max-width:1180px; margin:0 auto; padding:10p
 .modal-body .carousel-slide iframe{ height:100%; }
 .modal-fallback{ color:var(--mint-100); text-align:center; padding:40px; font-size:13.5px; }
 .modal-fallback a{ color:var(--gold-light); font-weight:600; }
+
+/* --- Zoom & pan untuk gambar di modal (support HP: pinch + drag,
+       laptop: scroll wheel + klik + drag) --- */
+.zoom-wrap{
+  position:relative; width:100%; height:78vh; overflow:hidden;
+  display:flex; align-items:center; justify-content:center;
+  touch-action:none;
+}
+.zoom-wrap img.zoomable{
+  max-width:100%; max-height:100%; object-fit:contain;
+  transform-origin:center center;
+  user-select:none; -webkit-user-drag:none;
+  transition:transform .12s ease-out;
+  will-change:transform;
+}
+.zoom-wrap img.zoomable.no-anim{ transition:none; }
+.zoom-hint{
+  position:absolute; top:12px; left:50%; transform:translateX(-50%);
+  z-index:5; font-size:11px; color:#eafbf1; background:rgba(11,70,48,.6);
+  padding:5px 12px; border-radius:999px; backdrop-filter:blur(4px);
+  pointer-events:none; opacity:.9;
+}
+.zoom-controls{
+  position:absolute; bottom:14px; right:14px; z-index:9;
+  display:flex; gap:6px;
+}
+.zoom-controls button{
+  width:34px; height:34px; border-radius:50%;
+  border:1px solid rgba(255,255,255,.35);
+  background:rgba(11,70,48,.72); color:#fff; font-size:16px; font-weight:700;
+  display:flex; align-items:center; justify-content:center;
+  backdrop-filter:blur(4px);
+}
+.zoom-controls button:hover{ background:rgba(11,70,48,.92); }
 
 .modal-foot{
   padding:14px 18px; border-top:1px solid var(--mint-200);
@@ -533,8 +570,11 @@ const SUBJECT_ICONS = {
   "Bimbingan Konseling (BK)":"🧭", "Geografi":"🗺️", "Matematika Tingkat Lanjut":"📐",
   "Bahasa Inggris Tingkat Lanjut":"🌐", "Informatika":"💻"
 };
-const TYPE_ICONS = { image:"🖼️", video:"🎬", pdf:"📄", pptx:"📊", mixed:"🗂️", other:"📁" };
-const TYPE_LABELS = { image:"Gambar", video:"Video / MP4", pdf:"PDF", pptx:"PPTX", mixed:"Campuran", other:"File" };
+
+/* Tambah xlsx & docx di sini -> otomatis dapat ikon, label, dan
+   filter dropdown yang sesuai di seluruh halaman. */
+const TYPE_ICONS  = { image:"🖼️", video:"🎬", pdf:"📄", pptx:"📽️", xlsx:"📊", docx:"📝", mixed:"🗂️", other:"📁" };
+const TYPE_LABELS = { image:"Gambar", video:"Video / MP4", pdf:"PDF", pptx:"PowerPoint (PPTX)", xlsx:"Excel (XLSX)", docx:"Word (DOCX)", mixed:"Campuran", other:"File" };
 
 /* ============================================================
    STATE
@@ -551,12 +591,15 @@ function normalizeKelompok(v){
   return "wajib";
 }
 
-/* Deteksi tipe file umum berdasar teks hint kolom "Tipe File" */
+/* Deteksi tipe file umum berdasar teks hint kolom "Tipe File" saja
+   (dipakai kalau URL-nya tidak punya ekstensi jelas, mis. link Drive) */
 function normalizeType(tipe, url){
   const t = (tipe||"").toLowerCase();
   const u = (url||"").toLowerCase();
   if(t.includes("pdf") || u.endsWith(".pdf")) return "pdf";
-  if(t.includes("ppt") || u.endsWith(".pptx") || u.endsWith(".ppt")) return "pptx";
+  if(t.includes("ppt") || t.includes("slide") || u.match(/\.pptx?$/)) return "pptx";
+  if(t.includes("xlsx") || t.includes("excel") || t.includes("spreadsheet") || u.match(/\.xlsx?$/)) return "xlsx";
+  if(t.includes("doc") || t.includes("word") || u.match(/\.docx?$/)) return "docx";
   if(t.includes("mp4") || t.includes("video") || u.match(/\.(mp4|webm|mov)$/)) return "video";
   if(t.includes("gambar") || t.includes("foto") || t.includes("image") || t.includes("png") || t.includes("jpg") || t.includes("jpeg") || u.match(/\.(png|jpe?g|gif|webp)$/)) return "image";
   return "other";
@@ -569,9 +612,37 @@ function detectUrlType(url, tipeHint){
   const u = (url||"").toLowerCase();
   if(u.match(/\.pdf(\?|$)/)) return "pdf";
   if(u.match(/\.(pptx|ppt)(\?|$)/)) return "pptx";
+  if(u.match(/\.(xlsx|xls)(\?|$)/)) return "xlsx";
+  if(u.match(/\.(docx|doc)(\?|$)/)) return "docx";
   if(u.match(/\.(mp4|webm|mov)(\?|$)/)) return "video";
   if(u.match(/\.(png|jpe?g|gif|webp)(\?|$)/)) return "image";
   return normalizeType(tipeHint, "");
+}
+
+/* Deteksi link Google Drive / Google Docs-Sheets-Slides.
+   Semua link Google itu polanya https://drive-atau-docs.google.com/<jenis>/d/<ID>/...
+   Dari situ kita bisa bikin:
+   - preview  -> ditanam di <iframe>, Drive punya viewer bawaan yang
+                 bisa render pdf/doc/xlsx/pptx/gambar/video + zoom sendiri
+   - thumbnail-> dipakai sebagai gambar kecil di kartu daftar tugas
+   - download -> link unduh langsung */
+function driveInfo(url){
+  const m = (url||"").match(/^https:\/\/(?:drive|docs)\.google\.com\/[a-zA-Z]+\/d\/([a-zA-Z0-9_-]+)/);
+  if(!m) return null;
+  const id = m[1];
+  const base = m[0];
+  return {
+    id,
+    preview: base + "/preview",
+    thumb: `https://drive.google.com/thumbnail?id=${id}&sz=w1000`,
+    download: `https://drive.google.com/uc?export=download&id=${id}`
+  };
+}
+
+/* Link unduh yang benar untuk 1 item (Drive vs hosting biasa) */
+function getDownloadUrl(item){
+  if(!item) return '#';
+  return item.drive ? item.drive.download : item.url;
 }
 
 /* Pecah kolom Url yang berisi banyak link dipisah koma */
@@ -612,7 +683,13 @@ function loadData(){
         .map(r => {
           const urls = parseUrls(r["Url"]);
           const tipeRaw = r["Tipe File"] || "";
-          const items = urls.map(u => ({ url: u, tipe: detectUrlType(u, tipeRaw) }));
+          const items = urls.map(u => {
+            const drive = driveInfo(u);
+            // link Drive nyaris tidak pernah punya ekstensi di URL-nya,
+            // jadi tipe filenya diambil dari hint kolom "Tipe File"
+            const tipe = drive ? normalizeType(tipeRaw, "") : detectUrlType(u, tipeRaw);
+            return { url: u, tipe, drive };
+          });
           const distinctTypes = [...new Set(items.map(it => it.tipe))];
           const dominantTipe = items.length === 0
             ? normalizeType(tipeRaw, "")
@@ -752,6 +829,7 @@ function renderTasks(rebuildFilter){
   grid.innerHTML = rows.map((r) => {
     const idx = state.all.indexOf(r);
     const previewHtml = buildCardPreview(r);
+    const downloadUrl = r.items && r.items.length ? getDownloadUrl(r.items[0]) : '#';
     return `
       <div class="task-card">
         <div class="task-preview">
@@ -765,7 +843,7 @@ function renderTasks(rebuildFilter){
         </div>
         <div class="task-actions">
           <button class="btn btn-primary" onclick="openModal(${idx})">👁 Lihat</button>
-          <a class="btn btn-ghost" href="${escapeHtml(r.url)}" target="_blank" rel="noopener" download>⬇ Unduh</a>
+          <a class="btn btn-ghost" href="${escapeHtml(downloadUrl)}" target="_blank" rel="noopener" download>⬇ Unduh</a>
         </div>
       </div>`;
   }).join('');
@@ -773,15 +851,20 @@ function renderTasks(rebuildFilter){
   setupAutoplayObserver();
 }
 
-/* Bikin satu ikon/thumbnail untuk sebuah item (dipakai di kartu preview) */
+/* Bikin satu ikon/thumbnail untuk sebuah item (dipakai di kartu preview).
+   Link Drive selalu pakai thumbnail resmi dari Google (kerja untuk
+   gambar, video, pdf, docx, xlsx, pptx sekaligus -> hemat & universal). */
 function cardSlideMedia(item, judul){
+  if(item.drive){
+    return `<img src="${escapeHtml(item.drive.thumb)}" loading="lazy" alt="${escapeHtml(judul)}" referrerpolicy="no-referrer" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'file-icon',textContent:'${TYPE_ICONS[item.tipe]||'📁'}'}))">`;
+  }
   if(item.tipe === 'image'){
     return `<img src="${escapeHtml(item.url)}" loading="lazy" alt="${escapeHtml(judul)}">`;
   }
   if(item.tipe === 'video'){
     return `<video src="${escapeHtml(item.url)}" muted loop playsinline preload="metadata" class="autovid"></video>`;
   }
-  // pdf / pptx / other -> tidak bisa dithumbnail kecil, tampilkan ikon
+  // pdf / pptx / xlsx / docx / other -> tidak bisa dithumbnail kecil, tampilkan ikon
   return `<div class="file-icon">${TYPE_ICONS[item.tipe]}</div>`;
 }
 
@@ -839,10 +922,27 @@ function setupAutoplayObserver(){
 /* ============================================================
    MODAL VIEWER
    ============================================================ */
-/* Bikin isi 1 slide modal sesuai tipe item-nya */
+/* Bikin isi 1 slide modal sesuai tipe item-nya.
+   - Link Drive: langsung pakai viewer bawaan Google (support zoom &
+     scroll sendiri untuk semua jenis file, paling stabil).
+   - Gambar dari hosting luar: dibungkus .zoom-wrap supaya bisa
+     di-zoom & digeser manual (lihat initZoomableImages di bawah).
+   - PDF dari hosting luar: iframe langsung.
+   - PPTX/XLSX/DOCX dari hosting luar: iframe Office Online Viewer. */
 function modalSlideContent(item, judul){
+  if(item.drive){
+    return `<iframe src="${escapeHtml(item.drive.preview)}" allow="autoplay" allowfullscreen></iframe>`;
+  }
   if(item.tipe === 'image'){
-    return `<img src="${escapeHtml(item.url)}" alt="${escapeHtml(judul)}" onclick="this.classList.toggle('zoomed')">`;
+    return `<div class="zoom-wrap">
+      <span class="zoom-hint">Cubit / scroll untuk zoom, geser untuk pan</span>
+      <img class="zoomable" src="${escapeHtml(item.url)}" alt="${escapeHtml(judul)}">
+      <div class="zoom-controls">
+        <button type="button" onclick="zoomStep(this,-1)" aria-label="Perkecil">−</button>
+        <button type="button" onclick="zoomReset(this)" aria-label="Reset zoom">⟲</button>
+        <button type="button" onclick="zoomStep(this,1)" aria-label="Perbesar">＋</button>
+      </div>
+    </div>`;
   }
   if(item.tipe === 'video'){
     return `<video src="${escapeHtml(item.url)}" controls playsinline></video>`;
@@ -850,7 +950,7 @@ function modalSlideContent(item, judul){
   if(item.tipe === 'pdf'){
     return `<iframe src="${escapeHtml(item.url)}"></iframe>`;
   }
-  if(item.tipe === 'pptx'){
+  if(item.tipe === 'pptx' || item.tipe === 'xlsx' || item.tipe === 'docx'){
     const officeSrc = "https://view.officeapps.live.com/op/embed.aspx?src=" + encodeURIComponent(item.url);
     return `<iframe src="${officeSrc}"></iframe>`;
   }
@@ -866,7 +966,7 @@ function openModal(idx){
 
   const items = r.items && r.items.length ? r.items : [];
   const dl = document.getElementById('modal-download');
-  dl.href = items[0] ? items[0].url : '#';
+  dl.href = items[0] ? getDownloadUrl(items[0]) : '#';
 
   const body = document.getElementById('modal-body');
 
@@ -880,7 +980,7 @@ function openModal(idx){
     }
   } else {
     const slides = items.map((it,i) => `
-      <div class="carousel-slide${i===0?' active':''}" data-slide="${i}">
+      <div class="carousel-slide${i===0?' active':''}" data-slide="${i}" data-download="${escapeHtml(getDownloadUrl(it))}">
         ${modalSlideContent(it, r.judul)}
         <span class="slide-badge">${TYPE_ICONS[it.tipe]} ${TYPE_LABELS[it.tipe]} · ${i+1}/${items.length}</span>
       </div>`).join('');
@@ -894,11 +994,15 @@ function openModal(idx){
       </div>`;
   }
 
+  // Aktifkan zoom & pan untuk semua gambar hasil hosting luar di modal ini
+  initZoomableImages(body);
+
   document.getElementById('modal-overlay').classList.add('active');
   document.body.style.overflow = 'hidden';
 }
 
-/* Sama seperti moveCarousel, tapi juga update tombol Unduh & pause video slide lama */
+/* Sama seperti moveCarousel, tapi juga pause video slide lama
+   & update tombol Unduh supaya mengikuti file yang sedang tampil */
 function modalCarouselMove(btn, dir){
   const track = btn.closest('[data-carousel]');
   const slides = [...track.querySelectorAll('.carousel-slide')];
@@ -911,6 +1015,9 @@ function modalCarouselMove(btn, dir){
   slides[cur].classList.remove('active'); if(dots[cur]) dots[cur].classList.remove('active');
   cur = (cur + dir + slides.length) % slides.length;
   slides[cur].classList.add('active'); if(dots[cur]) dots[cur].classList.add('active');
+
+  const dl = document.getElementById('modal-download');
+  if(dl && slides[cur].dataset.download) dl.href = slides[cur].dataset.download;
 }
 
 function closeModal(){
@@ -919,6 +1026,142 @@ function closeModal(){
   document.body.style.overflow = '';
 }
 document.addEventListener('keydown', e => { if(e.key === 'Escape') closeModal(); });
+
+/* ============================================================
+   ZOOM & PAN GAMBAR DI MODAL
+   Support: scroll wheel (laptop), klik untuk zoom-in bertahap,
+   drag mouse untuk geser (laptop), pinch 2 jari + drag 1 jari
+   untuk geser (HP), double click/double tap untuk toggle zoom.
+   Tombol +/-/reset di pojok kanan bawah untuk fallback manual.
+   ============================================================ */
+function touchDist(t){
+  const dx = t[0].clientX - t[1].clientX, dy = t[0].clientY - t[1].clientY;
+  return Math.sqrt(dx*dx + dy*dy);
+}
+
+function applyZoomFromData(img){
+  const s = parseFloat(img.dataset.scale || '1');
+  const tx = parseFloat(img.dataset.tx || '0');
+  const ty = parseFloat(img.dataset.ty || '0');
+  img.style.transform = `translate(${tx}px, ${ty}px) scale(${s})`;
+  img.style.cursor = s > 1 ? 'grab' : 'zoom-in';
+}
+
+function setImgScale(img, scale){
+  scale = Math.min(5, Math.max(1, scale));
+  img.dataset.scale = scale;
+  if(scale === 1){ img.dataset.tx = 0; img.dataset.ty = 0; }
+  applyZoomFromData(img);
+}
+
+/* Tombol manual di pojok modal */
+function zoomStep(btn, dir){
+  const img = btn.closest('.zoom-wrap').querySelector('img.zoomable');
+  if(!img) return;
+  img.classList.remove('no-anim');
+  setImgScale(img, parseFloat(img.dataset.scale || '1') + dir * 0.6);
+}
+function zoomReset(btn){
+  const img = btn.closest('.zoom-wrap').querySelector('img.zoomable');
+  if(!img) return;
+  img.classList.remove('no-anim');
+  setImgScale(img, 1);
+}
+
+/* Pasang semua event gesture ke setiap <img class="zoomable"> yang
+   baru dimasukkan ke modal (dipanggil sekali per render modal) */
+function initZoomableImages(container){
+  container.querySelectorAll('img.zoomable').forEach(img => {
+    if(img.dataset.zoomInit) return; // jangan pasang dobel
+    img.dataset.zoomInit = '1';
+    img.dataset.scale = '1'; img.dataset.tx = '0'; img.dataset.ty = '0';
+    applyZoomFromData(img);
+
+    let dragging = false, startX = 0, startY = 0, startTx = 0, startTy = 0;
+    let pinchDist = null, pinchStartScale = 1;
+
+    // Scroll wheel (laptop/desktop)
+    img.addEventListener('wheel', e => {
+      e.preventDefault();
+      img.classList.remove('no-anim');
+      const delta = e.deltaY < 0 ? 0.25 : -0.25;
+      setImgScale(img, parseFloat(img.dataset.scale) + delta);
+    }, { passive:false });
+
+    // Klik untuk zoom-in cepat, double click untuk toggle
+    img.addEventListener('dblclick', () => {
+      img.classList.remove('no-anim');
+      setImgScale(img, parseFloat(img.dataset.scale) > 1 ? 1 : 2.4);
+    });
+    img.addEventListener('click', () => {
+      if(dragging) return;
+      if(parseFloat(img.dataset.scale) === 1){
+        img.classList.remove('no-anim');
+        setImgScale(img, 2);
+      }
+    });
+
+    // Drag pakai mouse (laptop)
+    img.addEventListener('mousedown', e => {
+      if(parseFloat(img.dataset.scale) <= 1) return;
+      dragging = true;
+      img.classList.add('no-anim');
+      startX = e.clientX; startY = e.clientY;
+      startTx = parseFloat(img.dataset.tx); startTy = parseFloat(img.dataset.ty);
+      e.preventDefault();
+    });
+    window.addEventListener('mousemove', e => {
+      if(!dragging) return;
+      img.dataset.tx = startTx + (e.clientX - startX);
+      img.dataset.ty = startTy + (e.clientY - startY);
+      applyZoomFromData(img);
+    });
+    window.addEventListener('mouseup', () => {
+      if(dragging){ dragging = false; img.classList.remove('no-anim'); }
+    });
+
+    // Pinch zoom + drag pakai jari (HP/tablet)
+    let lastTap = 0;
+    img.addEventListener('touchstart', e => {
+      if(e.touches.length === 2){
+        pinchDist = touchDist(e.touches);
+        pinchStartScale = parseFloat(img.dataset.scale);
+        img.classList.add('no-anim');
+      } else if(e.touches.length === 1){
+        const now = Date.now();
+        if(now - lastTap < 300){
+          img.classList.remove('no-anim');
+          setImgScale(img, parseFloat(img.dataset.scale) > 1 ? 1 : 2.4);
+        }
+        lastTap = now;
+        if(parseFloat(img.dataset.scale) > 1){
+          dragging = true;
+          img.classList.add('no-anim');
+          startX = e.touches[0].clientX; startY = e.touches[0].clientY;
+          startTx = parseFloat(img.dataset.tx); startTy = parseFloat(img.dataset.ty);
+        }
+      }
+    }, { passive:true });
+
+    img.addEventListener('touchmove', e => {
+      if(e.touches.length === 2 && pinchDist){
+        const d = touchDist(e.touches);
+        setImgScale(img, pinchStartScale * (d / pinchDist));
+        e.preventDefault();
+      } else if(e.touches.length === 1 && dragging){
+        img.dataset.tx = startTx + (e.touches[0].clientX - startX);
+        img.dataset.ty = startTy + (e.touches[0].clientY - startY);
+        applyZoomFromData(img);
+        e.preventDefault();
+      }
+    }, { passive:false });
+
+    img.addEventListener('touchend', e => {
+      if(e.touches.length < 2) pinchDist = null;
+      if(e.touches.length === 0 && dragging){ dragging = false; img.classList.remove('no-anim'); }
+    });
+  });
+}
 
 /* ============================================================
    ANIMASI DAUN JATUH
