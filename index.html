@@ -443,13 +443,19 @@ main{ position:relative; z-index:2; max-width:1180px; margin:0 auto; padding:10p
 .modal-fallback{ color:var(--mint-100); text-align:center; padding:40px; font-size:13.5px; }
 .modal-fallback a{ color:var(--gold-light); font-weight:600; }
 
-/* Layar penuh untuk preview (docx/xlsx/pdf/dll jadi lega dilihat) */
+/* Layar penuh untuk preview (docx/xlsx/pdf/dll jadi lega dilihat).
+   .pseudo-fullscreen adalah FALLBACK pakai CSS biasa (bukan Fullscreen
+   API asli) -- dipakai kalau situs ini ditanam via <iframe> (mis. di
+   Google Sites) yang biasanya BLOKIR Fullscreen API browser. */
 .modal-panel:fullscreen,
-.modal-panel:-webkit-full-screen{
+.modal-panel:-webkit-full-screen,
+.modal-panel.pseudo-fullscreen{
   max-width:100vw; max-height:100vh; width:100vw; height:100vh; border-radius:0;
+  position:fixed; inset:0; z-index:200;
 }
 .modal-panel:fullscreen .modal-body,
-.modal-panel:-webkit-full-screen .modal-body{ min-height:0; }
+.modal-panel:-webkit-full-screen .modal-body,
+.modal-panel.pseudo-fullscreen .modal-body{ min-height:0; }
 .modal-panel:fullscreen .modal-body iframe,
 .modal-panel:fullscreen .modal-body video,
 .modal-panel:fullscreen .zoom-wrap,
@@ -457,9 +463,18 @@ main{ position:relative; z-index:2; max-width:1180px; margin:0 auto; padding:10p
 .modal-panel:-webkit-full-screen .modal-body iframe,
 .modal-panel:-webkit-full-screen .modal-body video,
 .modal-panel:-webkit-full-screen .zoom-wrap,
-.modal-panel:-webkit-full-screen .modal-body .carousel-track{
+.modal-panel:-webkit-full-screen .modal-body .carousel-track,
+.modal-panel.pseudo-fullscreen .modal-body iframe,
+.modal-panel.pseudo-fullscreen .modal-body video,
+.modal-panel.pseudo-fullscreen .zoom-wrap,
+.modal-panel.pseudo-fullscreen .modal-body .carousel-track{
   height:100% !important;
 }
+
+/* Badge tipe/urutan file (mis. "Word (DOCX) · 1/2") cuma dipakai di
+   kartu daftar tugas -- di dalam modal preview harus disembunyikan
+   karena bakal nutupin isi dokumen/gambar aslinya */
+.modal-body .slide-badge{ display:none; }
 
 /* --- Zoom & pan untuk gambar di modal (support HP: pinch + drag,
        laptop: scroll wheel + klik + drag) --- */
@@ -707,6 +722,19 @@ function getDownloadUrl(item){
   return item.drive ? item.drive.download : item.url;
 }
 
+/* Link PREVIEW yang benar untuk 1 item -- dipakai buat buka tab baru.
+   docx/xlsx/pptx/csv diarahkan ke Google Docs/Sheets Viewer (lega,
+   full-page, gak kesempit di card/modal kamu). Link Drive diarahkan
+   ke viewer bawaan Drive. Sisanya (pdf/gambar/video/txt) langsung ke
+   file aslinya -- browser modern sudah bisa menampilkannya sendiri. */
+function getPreviewUrl(item){
+  if(!item) return '#';
+  if(item.drive) return item.drive.preview;
+  if(item.tipe === 'pptx' || item.tipe === 'xlsx' || item.tipe === 'docx' || item.tipe === 'csv'){
+    return googleViewerSrc(item.url);
+  }
+  return item.url;
+}
 /* Preview docx/xlsx/pptx pakai Google Docs Viewer, jadi yang muncul
    PRATINJAU langsung (kayak buka di Google Docs/Spreadsheet), bukan
    malah kepicu download di HP/laptop — sama kayak tipe file lain. */
@@ -897,10 +925,22 @@ function renderTasks(rebuildFilter){
     return;
   }
 
-  grid.innerHTML = rows.map((r) => {
+   grid.innerHTML = rows.map((r) => {
     const idx = state.all.indexOf(r);
     const previewHtml = buildCardPreview(r);
-    const downloadUrl = r.items && r.items.length ? getDownloadUrl(r.items[0]) : '#';
+    const firstItem = r.items && r.items.length ? r.items[0] : null;
+    const downloadUrl = firstItem ? getDownloadUrl(firstItem) : '#';
+
+    // Gambar/video dibuka di modal internal (support zoom/pan, aman
+    // dari masalah nested-iframe). Selain itu (pdf/pptx/xlsx/docx/
+    // csv/txt/Drive/mixed) dibuka di TAB BARU ke viewer aslinya --
+    // supaya lega dilihat & gak kena block waktu situs ini ditanam
+    // berlapis di Google Sites.
+    const useInlineModal = firstItem && (r.tipe === 'image' || r.tipe === 'video');
+    const lihatHtml = useInlineModal
+      ? `<button class="btn btn-primary" onclick="openModal(${idx})">👁 Lihat</button>`
+      : `<a class="btn btn-primary" href="${escapeHtml(getPreviewUrl(firstItem))}" target="_blank" rel="noopener">👁 Lihat</a>`;
+
     return `
       <div class="task-card">
         <div class="task-preview">
@@ -913,12 +953,11 @@ function renderTasks(rebuildFilter){
           <div class="task-desc">${escapeHtml(r.deskripsi)}</div>
         </div>
         <div class="task-actions">
-          <button class="btn btn-primary" onclick="openModal(${idx})">👁 Lihat</button>
+          ${lihatHtml}
           <a class="btn btn-ghost" href="${escapeHtml(downloadUrl)}" target="_blank" rel="noopener" download>⬇ Unduh</a>
         </div>
       </div>`;
   }).join('');
-
   setupAutoplayObserver();
 }
 
@@ -1101,29 +1140,62 @@ function modalCarouselMove(btn, dir){
 }
 
 function closeModal(){
+  const panel = document.querySelector('.modal-panel');
   if(document.fullscreenElement || document.webkitFullscreenElement){
     (document.exitFullscreen || document.webkitExitFullscreen || function(){}).call(document);
   }
+  if(panel) panel.classList.remove('pseudo-fullscreen');
   document.getElementById('modal-overlay').classList.remove('active');
   document.getElementById('modal-body').innerHTML = '';
   document.body.style.overflow = '';
 }
 document.addEventListener('keydown', e => { if(e.key === 'Escape') closeModal(); });
 
+/* Coba Fullscreen API asli dulu. Kalau situs ini ditanam via <iframe>
+   tanpa atribut allowfullscreen (kasus umum kalau di-embed di Google
+   Sites), browser bakal nolak/gagal diam-diam -- makanya ada fallback
+   "layar penuh semu" pakai CSS (.pseudo-fullscreen) yang selalu jalan
+   di kondisi apa pun. */
 function toggleFullscreen(){
   const panel = document.querySelector('.modal-panel');
   if(!panel) return;
-  const isFs = document.fullscreenElement || document.webkitFullscreenElement;
-  if(!isFs){
-    (panel.requestFullscreen || panel.webkitRequestFullscreen || function(){}).call(panel);
-  } else {
-    (document.exitFullscreen || document.webkitExitFullscreen || function(){}).call(document);
+
+  const isCssFs = panel.classList.contains('pseudo-fullscreen');
+  const isRealFs = document.fullscreenElement || document.webkitFullscreenElement;
+
+  if(isCssFs || isRealFs){
+    if(isRealFs){
+      (document.exitFullscreen || document.webkitExitFullscreen || function(){}).call(document);
+    }
+    panel.classList.remove('pseudo-fullscreen');
+    updateFullscreenIcon();
+    return;
+  }
+
+  const req = panel.requestFullscreen || panel.webkitRequestFullscreen;
+  if(!req || document.fullscreenEnabled === false){
+    panel.classList.add('pseudo-fullscreen');
+    updateFullscreenIcon();
+    return;
+  }
+  try{
+    const result = req.call(panel);
+    if(result && result.catch){
+      result.catch(() => {
+        panel.classList.add('pseudo-fullscreen');
+        updateFullscreenIcon();
+      });
+    }
+  }catch(e){
+    panel.classList.add('pseudo-fullscreen');
+    updateFullscreenIcon();
   }
 }
 function updateFullscreenIcon(){
   const btn = document.getElementById('modal-fullscreen-btn');
   if(!btn) return;
-  const isFs = document.fullscreenElement || document.webkitFullscreenElement;
+  const panel = document.querySelector('.modal-panel');
+  const isFs = document.fullscreenElement || document.webkitFullscreenElement || (panel && panel.classList.contains('pseudo-fullscreen'));
   btn.textContent = isFs ? '⤢' : '⛶';
   btn.setAttribute('aria-label', isFs ? 'Keluar layar penuh' : 'Layar penuh');
 }
