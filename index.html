@@ -122,6 +122,7 @@ main{ position:relative; z-index:2; max-width:1180px; margin:0 auto; padding:10p
 .choice-card{
   position:relative; background:var(--paper-2); border-radius:14px; padding:34px 24px 28px; text-align:center;
   border:1px solid rgba(15,92,63,.15); box-shadow: var(--shadow); transition: transform .25s ease, box-shadow .25s ease;
+  cursor:pointer;
 }
 .choice-card::before, .choice-card::after{
   content:""; position:absolute; left:10px; right:10px; height:12px;
@@ -156,6 +157,7 @@ main{ position:relative; z-index:2; max-width:1180px; margin:0 auto; padding:10p
 .subject-card{
   background:var(--paper-2); border-radius:16px; padding:22px 18px; border:1px solid rgba(15,92,63,.13);
   box-shadow: var(--shadow); position:relative; overflow:hidden; transition: transform .2s ease, box-shadow .2s ease;
+  cursor:pointer;
 }
 .subject-card::before{ content:""; position:absolute; top:0; left:0; right:0; height:5px; background:linear-gradient(90deg, var(--jade-500), var(--gold)); }
 .subject-card:hover{ transform:translateY(-4px); box-shadow:0 16px 34px -14px rgba(11,70,48,.35); }
@@ -187,6 +189,8 @@ main{ position:relative; z-index:2; max-width:1180px; margin:0 auto; padding:10p
 .task-desc{
   font-size:12.5px; color:var(--ink-soft); line-height:1.5; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; flex:1;
 }
+.desc-link{ color:var(--jade-700); text-decoration:underline; word-break:break-all; cursor:pointer; }
+.desc-link:hover{ color:var(--jade-900); }
 .task-actions{ display:flex; flex-direction:column; gap:8px; padding:14px 16px 16px; }
 .action-row{ display:flex; gap:8px; }
 .btn{
@@ -502,6 +506,21 @@ function todayFormatted(){
 function escapeHtml(s){
   return (s||"").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
+// Ubah teks polos jadi HTML aman + link biru yang bisa diklik kalau ada
+// URL (http/https/www) di dalamnya. Tanda baca di ujung URL (. , ) ! ?)
+// dilepas dulu biar nggak ikut ke-link.
+function linkifyText(s){
+  const escaped = escapeHtml(s||"");
+  return escaped.replace(/(https?:\/\/[^\s<]+|www\.[^\s<]+)/g, (m) => {
+    let trail = '';
+    while(m.length && /[.,;:!?)\]}'"]/.test(m[m.length-1])){
+      trail = m[m.length-1] + trail;
+      m = m.slice(0, -1);
+    }
+    const href = m.startsWith('http') ? m : 'https://' + m;
+    return `<a href="${href}" target="_blank" rel="noopener" class="desc-link">${m}</a>${trail}`;
+  });
+}
 function orderedSubjects(kelompok){
   return kelompok === "wajib" ? WAJIB_ORDER : PILIHAN_ORDER;
 }
@@ -651,10 +670,10 @@ function renderTasks(rebuildFilter){
           <span class="type-badge">${TYPE_ICONS[initialTipe]} ${TYPE_LABELS[initialTipe]}</span>
           ${buildCardPreview(r)}
         </div>
-        <div class="task-body">
+              <div class="task-body">
           <h5>${escapeHtml(r.judul)}</h5>
           <div class="task-date">🗓️ ${escapeHtml(r.tanggal)}</div>
-          <div class="task-desc">${escapeHtml(r.deskripsi)}</div>
+          <div class="task-desc">${linkifyText(r.deskripsi)}</div>
         </div>
         <div class="task-actions">
           <div class="action-row">
@@ -791,8 +810,8 @@ function openModal(idx){
   const r = state.all[idx];
   if(!r) return;
   document.getElementById('modal-title').textContent = r.judul;
-  document.getElementById('modal-meta').innerHTML =
-    `<b>${escapeHtml(r.mapel)}</b> · 🗓️ ${escapeHtml(r.tanggal)}<br>${escapeHtml(r.deskripsi)}`;
+   document.getElementById('modal-meta').innerHTML =
+    `<b>${escapeHtml(r.mapel)}</b> · 🗓️ ${escapeHtml(r.tanggal)}<br>${linkifyText(r.deskripsi)}`;
   const items = r.items && r.items.length ? r.items : [];
   const dl = document.getElementById('modal-download');
   const pv = document.getElementById('modal-preview');
