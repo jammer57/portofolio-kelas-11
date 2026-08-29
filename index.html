@@ -5,51 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>翠卷 · Portofolio Tugas Sekolah</title>
 
-<!--
-  ================================================================
-  PORTOFOLIO TUGAS SEKOLAH — Kelas 11
-  ================================================================
-  CARA PAKAI (GitHub Pages):
-  1. Simpan file ini sebagai index.html di root repo GitHub kamu.
-  2. Aktifkan GitHub Pages (Settings > Pages > Deploy from branch).
-  3. Data diambil otomatis dari Google Sheet yang sudah di-publish
-     sebagai CSV (lihat konstanta SHEET_URL di bagian <script> bawah).
-  4. Kolom sheet yang dipakai (harus persis ada, urutan bebas):
-     No | Kelompok | Mata Pelajaran | Judul Tugas | Deskripsi | Tanggal | Tipe File | Url
-     - Kelompok  : isi "Wajib" atau "Pilihan" (bebas besar/kecil huruf,
-                   asal mengandung kata "wajib" atau "pilih")
-     - Tipe File : isi salah satu -> Gambar / PDF / PPTX / XLSX / DOCX / MP4
-                   (bebas besar/kecil huruf). Ini dipakai sebagai HINT
-                   kalau linknya tidak punya ekstensi jelas (mis. link
-                   Google Drive).
-     - Url       : link file dari hosting luar (imgur, dsb) ATAU link
-                   Google Drive (drive.google.com / docs.google.com —
-                   otomatis dideteksi & dibuatkan preview + tombol
-                   unduh yang benar). BISA DIISI LEBIH DARI SATU FILE,
-                   pisahkan dengan KOMA, boleh campur tipe file dalam
-                   satu baris/tugas — otomatis jadi carousel dengan
-                   tombol panah di satu kartu.
-                   Contoh: https://x.com/a.jpg,https://drive.google.com/file/d/FILEID/view
-     - Tanggal   : kalau dikosongin, otomatis diisi tanggal hari ini
-                   saat halaman dibuka.
-  5. Tipe file yang didukung untuk PRATINJAU (bukan cuma unduh):
-     Gambar, Video (MP4), PDF, PPTX, XLSX, DOCX, dan link Google Drive
-     apa pun (Drive punya viewer bawaan yang bisa render hampir semua
-     jenis file, jadi ini pilihan paling hemat & paling kompatibel).
-  6. Mata Pelajaran wajib ditulis PERSIS (case-sensitive) sesuai daftar
-     di WAJIB_ORDER / PILIHAN_ORDER di bagian <script> supaya dapat
-     ikon yang sesuai. Kalau beda dikit, tugasnya tetap masuk hitungan
-     mapel "Lainnya"/default, jadi usahakan sama persis.
-  7. Tidak perlu server tambahan — murni HTML+CSS+JS statis.
-  ================================================================
--->
-
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Poppins:wght@300;400;500;600;700&family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
 
 <style>
-/* =================== DESIGN TOKENS =================== */
 :root{
   --jade-900:#0B4630;
   --jade-800:#0F5C3F;
@@ -71,7 +31,6 @@
   --font-body:'Poppins', sans-serif;
   --font-brush:'Ma Shan Zheng', cursive;
 }
-
 *{box-sizing:border-box; margin:0; padding:0;}
 html{scroll-behavior:smooth;}
 body{
@@ -87,25 +46,10 @@ body{
 img{max-width:100%; display:block;}
 button{font-family:inherit; cursor:pointer;}
 a{color:inherit;}
-
 ::selection{ background:var(--jade-300); color:var(--jade-900); }
-
-/* subtle lattice texture used behind sections */
-.lattice-bg{
-  background-image:
-    linear-gradient(45deg, rgba(15,92,63,.045) 25%, transparent 25%, transparent 75%, rgba(15,92,63,.045) 75%),
-    linear-gradient(45deg, rgba(15,92,63,.045) 25%, transparent 25%, transparent 75%, rgba(15,92,63,.045) 75%);
-  background-size: 34px 34px;
-  background-position: 0 0, 17px 17px;
-}
-
-/* =================== FALLING LEAVES =================== */
-#leaves-layer{
-  position:fixed; inset:0; pointer-events:none; z-index:1; overflow:hidden;
-}
+#leaves-layer{ position:fixed; inset:0; pointer-events:none; z-index:1; overflow:hidden; }
 .leaf{
-  position:absolute; top:-40px;
-  width:16px; height:16px;
+  position:absolute; top:-40px; width:16px; height:16px;
   background:linear-gradient(135deg, var(--jade-300), var(--jade-700));
   clip-path: polygon(50% 0%, 100% 35%, 82% 100%, 50% 78%, 18% 100%, 0% 35%);
   opacity:.55;
@@ -113,20 +57,12 @@ a{color:inherit;}
   animation-timing-function: linear, ease-in-out;
   animation-iteration-count: 1, infinite;
 }
-@keyframes leafFall{
-  from{ transform: translateY(-5vh) rotate(0deg); }
-  to{ transform: translateY(105vh) rotate(340deg); }
-}
-@keyframes leafSway{
-  0%,100%{ margin-left:0px; }
-  50%{ margin-left:40px; }
-}
+@keyframes leafFall{ from{ transform: translateY(-5vh) rotate(0deg); } to{ transform: translateY(105vh) rotate(340deg); } }
+@keyframes leafSway{ 0%,100%{ margin-left:0px; } 50%{ margin-left:40px; } }
 @media (prefers-reduced-motion: reduce){
   .leaf{ display:none; }
   *{ animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; }
 }
-
-/* =================== TOPBAR =================== */
 .topbar{
   position:sticky; top:0; z-index:20;
   display:flex; align-items:center; justify-content:space-between;
@@ -135,7 +71,6 @@ a{color:inherit;}
   backdrop-filter:blur(10px);
   border-bottom:1px solid rgba(15,92,63,.14);
 }
-  
 .running-bar{
   position:relative; z-index:15;
   background:
@@ -146,108 +81,51 @@ a{color:inherit;}
   border-bottom:1px solid rgba(201,162,75,.45);
   box-shadow: inset 0 0 14px rgba(0,0,0,.25);
 }
-.running-track{
-  display:inline-block; padding-left:100%;
-  animation: runningText 20s linear infinite;
-}
-.running-track span{
-  color:var(--gold-light); font-size:12px; font-weight:600; letter-spacing:.4px;
-  padding:7px 0; display:inline-block;
-}
+.running-track{ display:inline-block; padding-left:100%; animation: runningText 20s linear infinite; }
+.running-track span{ color:var(--gold-light); font-size:12px; font-weight:600; letter-spacing:.4px; padding:7px 0; display:inline-block; }
 .running-track .sep-ico{ color:var(--gold); margin:0 12px; }
-@keyframes runningText{
-  from{ transform:translateX(0); }
-  to{ transform:translateX(-100%); }
-}
-  
-.brand{ display:flex; align-items:center; gap:12px; cursor:pointer; }
+@keyframes runningText{ from{ transform:translateX(0); } to{ transform:translateX(-100%); } }
 .brand{ display:flex; align-items:center; gap:12px; cursor:pointer; }
 .seal{
   width:38px; height:38px; flex:0 0 auto;
   background:linear-gradient(160deg, var(--seal-red), #8B241B);
-  border:2px solid var(--gold-light);
-  border-radius:8px;
+  border:2px solid var(--gold-light); border-radius:8px;
   display:flex; align-items:center; justify-content:center;
   color:#fff2df; font-family:var(--font-brush); font-size:22px;
-  box-shadow: var(--shadow);
-  transform:rotate(-4deg);
+  box-shadow: var(--shadow); transform:rotate(-4deg);
 }
-  
 .brand-text{ display:flex; flex-direction:column; line-height:1.1; }
 .brand-text b{ font-family:var(--font-display); font-size:17px; color:var(--jade-900); letter-spacing:.3px; }
 .brand-text span{ font-size:11px; color:var(--ink-soft); letter-spacing:.5px; }
-
 .breadcrumb{ display:flex; align-items:center; gap:6px; font-size:13px; color:var(--ink-soft); flex-wrap:wrap; }
-.breadcrumb button{
-  background:none; border:none; color:var(--jade-700); font-weight:600;
-  padding:4px 6px; border-radius:6px;
-}
+.breadcrumb button{ background:none; border:none; color:var(--jade-700); font-weight:600; padding:4px 6px; border-radius:6px; }
 .breadcrumb button:hover{ background:var(--mint-200); }
 .breadcrumb .sep{ opacity:.5; }
 .breadcrumb .current{ color:var(--ink); font-weight:600; }
-
-/* =================== LAYOUT / SCREENS =================== */
 main{ position:relative; z-index:2; max-width:1180px; margin:0 auto; padding:10px 22px 80px; }
 .screen{ display:none; }
 .screen.active{ display:block; animation: screenIn .5s ease; }
 @keyframes screenIn{ from{opacity:0; transform:translateY(14px);} to{opacity:1; transform:none;} }
-
-/* =================== HERO / MOON GATE =================== */
 .hero{ text-align:center; padding:56px 10px 30px; }
 .moon-gate{
-  width:230px; height:230px; margin:0 auto 22px;
-  border-radius:50%;
-  background:
-    radial-gradient(circle at 50% 30%, var(--mint-100), var(--mint-200) 60%, var(--jade-300) 100%);
-  border:6px solid var(--gold-light);
-  outline:2px solid var(--jade-700);
-  outline-offset:6px;
-  display:flex; align-items:center; justify-content:center;
-  box-shadow: var(--shadow);
-  position:relative;
+  width:230px; height:230px; margin:0 auto 22px; border-radius:50%;
+  background: radial-gradient(circle at 50% 30%, var(--mint-100), var(--mint-200) 60%, var(--jade-300) 100%);
+  border:6px solid var(--gold-light); outline:2px solid var(--jade-700); outline-offset:6px;
+  display:flex; align-items:center; justify-content:center; box-shadow: var(--shadow); position:relative;
 }
-.moon-gate::after{
-  content:"学";
-  font-family:var(--font-brush);
-  font-size:96px;
-  color:var(--jade-800);
-  opacity:.85;
-}
-.hero h1{
-  font-family:var(--font-display); font-weight:700;
-  font-size:clamp(28px,4.2vw,44px);
-  color:var(--jade-900);
-  margin-bottom:8px;
-  letter-spacing:.3px;
-}
-.hero p.sub{
-  color:var(--ink-soft); font-size:15px; margin-bottom:6px;
-}
-.hero .divider{
-  width:70px; height:3px; margin:18px auto 34px;
-  background:linear-gradient(90deg, transparent, var(--gold), transparent);
-}
-
-.choice-grid{
-  display:grid; grid-template-columns:1fr 1fr; gap:26px;
-  max-width:820px; margin:0 auto;
-}
+.moon-gate::after{ content:"学"; font-family:var(--font-brush); font-size:96px; color:var(--jade-800); opacity:.85; }
+.hero h1{ font-family:var(--font-display); font-weight:700; font-size:clamp(28px,4.2vw,44px); color:var(--jade-900); margin-bottom:8px; letter-spacing:.3px; }
+.hero p.sub{ color:var(--ink-soft); font-size:15px; margin-bottom:6px; }
+.hero .divider{ width:70px; height:3px; margin:18px auto 34px; background:linear-gradient(90deg, transparent, var(--gold), transparent); }
+.choice-grid{ display:grid; grid-template-columns:1fr 1fr; gap:26px; max-width:820px; margin:0 auto; }
 @media (max-width:640px){ .choice-grid{ grid-template-columns:1fr; } }
-
 .choice-card{
-  position:relative;
-  background:var(--paper-2);
-  border-radius:14px;
-  padding:34px 24px 28px;
-  text-align:center;
-  border:1px solid rgba(15,92,63,.15);
-  box-shadow: var(--shadow);
-  transition: transform .25s ease, box-shadow .25s ease;
+  position:relative; background:var(--paper-2); border-radius:14px; padding:34px 24px 28px; text-align:center;
+  border:1px solid rgba(15,92,63,.15); box-shadow: var(--shadow); transition: transform .25s ease, box-shadow .25s ease;
 }
 .choice-card::before, .choice-card::after{
   content:""; position:absolute; left:10px; right:10px; height:12px;
-  background:linear-gradient(90deg, var(--gold), var(--gold-light), var(--gold));
-  border-radius:6px;
+  background:linear-gradient(90deg, var(--gold), var(--gold-light), var(--gold)); border-radius:6px;
 }
 .choice-card::before{ top:-6px; }
 .choice-card::after{ bottom:-6px; }
@@ -256,184 +134,120 @@ main{ position:relative; z-index:2; max-width:1180px; margin:0 auto; padding:10p
 .choice-card h3{ font-family:var(--font-display); color:var(--jade-900); font-size:21px; margin-bottom:6px; }
 .choice-card p{ color:var(--ink-soft); font-size:13px; margin-bottom:14px; }
 .choice-count{
-  display:inline-block; font-size:12px; font-weight:600;
-  background:var(--mint-100); color:var(--jade-700);
+  display:inline-block; font-size:12px; font-weight:600; background:var(--mint-100); color:var(--jade-700);
   padding:5px 14px; border-radius:999px; border:1px solid var(--jade-300);
 }
-
-/* =================== TOOLBAR (breadcrumb area inside screens) =================== */
 .section-head{ text-align:center; margin:36px 0 26px; }
 .section-head h2{ font-family:var(--font-display); font-size:clamp(24px,3.4vw,32px); color:var(--jade-900); }
 .section-head p{ color:var(--ink-soft); font-size:13px; margin-top:6px; }
-
-.toolbar{
-  display:flex; align-items:center; justify-content:space-between; gap:14px;
-  flex-wrap:wrap; margin-bottom:24px;
-}
+.toolbar{ display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; margin-bottom:24px; }
 .back-btn{
-  display:inline-flex; align-items:center; gap:6px;
-  background:var(--paper-2); border:1px solid var(--jade-300); color:var(--jade-800);
-  font-weight:600; font-size:13px; padding:9px 16px; border-radius:999px;
-  box-shadow:0 4px 10px -4px rgba(15,92,63,.25);
+  display:inline-flex; align-items:center; gap:6px; background:var(--paper-2); border:1px solid var(--jade-300); color:var(--jade-800);
+  font-weight:600; font-size:13px; padding:9px 16px; border-radius:999px; box-shadow:0 4px 10px -4px rgba(15,92,63,.25);
 }
 .back-btn:hover{ background:var(--mint-100); }
-
 .filter-select{
   appearance:none; -webkit-appearance:none;
   background:var(--paper-2) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="%230F5C3F" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>') no-repeat right 12px center;
-  background-size:14px;
-  border:1px solid var(--jade-300); color:var(--jade-800); font-weight:500;
-  font-size:13px; padding:9px 34px 9px 14px; border-radius:999px;
-  box-shadow:0 4px 10px -4px rgba(15,92,63,.2);
+  background-size:14px; border:1px solid var(--jade-300); color:var(--jade-800); font-weight:500;
+  font-size:13px; padding:9px 34px 9px 14px; border-radius:999px; box-shadow:0 4px 10px -4px rgba(15,92,63,.2);
 }
-
-/* =================== SUBJECT GRID =================== */
-.subject-grid{
-  display:grid; grid-template-columns:repeat(auto-fill, minmax(230px,1fr)); gap:18px;
-}
+.subject-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(230px,1fr)); gap:18px; }
 .subject-card{
-  background:var(--paper-2); border-radius:16px; padding:22px 18px;
-  border:1px solid rgba(15,92,63,.13);
-  box-shadow: var(--shadow);
-  position:relative; overflow:hidden;
-  transition: transform .2s ease, box-shadow .2s ease;
+  background:var(--paper-2); border-radius:16px; padding:22px 18px; border:1px solid rgba(15,92,63,.13);
+  box-shadow: var(--shadow); position:relative; overflow:hidden; transition: transform .2s ease, box-shadow .2s ease;
 }
-.subject-card::before{
-  content:""; position:absolute; top:0; left:0; right:0; height:5px;
-  background:linear-gradient(90deg, var(--jade-500), var(--gold));
-}
+.subject-card::before{ content:""; position:absolute; top:0; left:0; right:0; height:5px; background:linear-gradient(90deg, var(--jade-500), var(--gold)); }
 .subject-card:hover{ transform:translateY(-4px); box-shadow:0 16px 34px -14px rgba(11,70,48,.35); }
 .subject-icon{ font-size:30px; margin-bottom:10px; }
 .subject-card h4{ font-family:var(--font-display); font-size:16px; color:var(--jade-900); margin-bottom:8px; line-height:1.3; min-height:42px;}
 .subject-count{
-  font-size:11.5px; font-weight:600; color:var(--jade-700);
-  background:var(--mint-100); border:1px solid var(--jade-300);
+  font-size:11.5px; font-weight:600; color:var(--jade-700); background:var(--mint-100); border:1px solid var(--jade-300);
   display:inline-block; padding:4px 10px; border-radius:999px;
 }
-
-/* =================== TASK GRID / CARDS =================== */
-.task-grid{
-  display:grid; grid-template-columns:repeat(auto-fill, minmax(260px,1fr)); gap:20px;
-}
+.task-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(260px,1fr)); gap:20px; }
 .task-card{
-  background:var(--paper-2); border-radius:16px; overflow:hidden;
-  border:1px solid rgba(15,92,63,.13);
-  box-shadow: var(--shadow);
-  display:flex; flex-direction:column;
-  transition: transform .2s ease, box-shadow .2s ease;
+  background:var(--paper-2); border-radius:16px; overflow:hidden; border:1px solid rgba(15,92,63,.13);
+  box-shadow: var(--shadow); display:flex; flex-direction:column; transition: transform .2s ease, box-shadow .2s ease;
 }
 .task-card:hover{ transform:translateY(-4px); box-shadow:0 18px 36px -14px rgba(11,70,48,.35); }
-
 .task-preview{
   position:relative; width:100%; aspect-ratio:16/10; overflow:hidden;
-  background:linear-gradient(160deg, var(--jade-700), var(--jade-900));
-  display:flex; align-items:center; justify-content:center;
+  background:linear-gradient(160deg, var(--jade-700), var(--jade-900)); display:flex; align-items:center; justify-content:center;
 }
 .task-preview img, .task-preview video{ width:100%; height:100%; object-fit:cover; }
 .task-preview .file-icon{ font-size:52px; opacity:.9; }
 .type-badge{
-  position:absolute; top:10px; left:10px; z-index:6;
-  font-size:10.5px; font-weight:700; letter-spacing:.3px;
-  color:#fff; background:rgba(11,70,48,.75); backdrop-filter:blur(4px);
-  padding:4px 10px; border-radius:999px; border:1px solid rgba(255,255,255,.25);
+  position:absolute; top:10px; left:10px; z-index:6; font-size:10.5px; font-weight:700; letter-spacing:.3px;
+  color:#fff; background:rgba(11,70,48,.75); backdrop-filter:blur(4px); padding:4px 10px; border-radius:999px; border:1px solid rgba(255,255,255,.25);
 }
-
 .task-body{ padding:16px 16px 8px; flex:1; display:flex; flex-direction:column; }
 .task-body h5{ font-family:var(--font-display); font-size:15.5px; color:var(--jade-900); line-height:1.35; margin-bottom:6px; }
 .task-date{ font-size:11.5px; color:var(--gold); font-weight:600; margin-bottom:8px; }
 .task-desc{
-  font-size:12.5px; color:var(--ink-soft); line-height:1.5;
-  display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden;
-  flex:1;
+  font-size:12.5px; color:var(--ink-soft); line-height:1.5; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; flex:1;
 }
-
-.task-actions{ display:flex; gap:8px; padding:14px 16px 16px; }
+.task-actions{ display:flex; flex-direction:column; gap:8px; padding:14px 16px 16px; }
+.action-row{ display:flex; gap:8px; }
 .btn{
-  flex:1; text-align:center; font-size:12.5px; font-weight:600;
-  padding:9px 10px; border-radius:10px; border:1px solid transparent;
-  display:inline-flex; align-items:center; justify-content:center; gap:6px;
+  flex:1; text-align:center; font-size:12px; font-weight:600;
+  padding:9px 8px; border-radius:10px; border:1px solid transparent;
+  display:inline-flex; align-items:center; justify-content:center; gap:5px;
   text-decoration:none;
 }
 .btn-primary{ background:linear-gradient(135deg, var(--jade-500), var(--jade-800)); color:#fff; box-shadow:0 6px 14px -6px rgba(15,92,63,.55); }
 .btn-primary:hover{ filter:brightness(1.08); }
 .btn-ghost{ background:var(--mint-100); color:var(--jade-800); border-color:var(--jade-300); }
 .btn-ghost:hover{ background:var(--mint-200); }
-
-/* =================== CAROUSEL (multi-file 1 kartu) =================== */
+.btn-gold{ background:var(--paper-2); color:var(--gold); border-color:var(--gold-light); }
+.btn-gold:hover{ background:var(--mint-100); }
 .carousel-track{ position:relative; width:100%; height:100%; }
 .carousel-slide{ position:absolute; inset:0; opacity:0; z-index:0; transition:opacity .25s ease; display:flex; align-items:center; justify-content:center; pointer-events:none; }
 .carousel-slide.active{ opacity:1; z-index:1; pointer-events:auto; }
 .carousel-slide img, .carousel-slide video{ width:100%; height:100%; object-fit:cover; }
 .carousel-slide .file-icon{ font-size:44px; opacity:.9; color:#fff; }
 .slide-badge{
-  position:absolute; bottom:8px; left:8px; z-index:6;
-  font-size:9.5px; font-weight:700; letter-spacing:.3px;
-  color:#fff; background:rgba(11,70,48,.75); backdrop-filter:blur(4px);
-  padding:3px 8px; border-radius:999px; border:1px solid rgba(255,255,255,.25);
+  position:absolute; bottom:8px; left:8px; z-index:6; font-size:9.5px; font-weight:700; letter-spacing:.3px;
+  color:#fff; background:rgba(11,70,48,.75); backdrop-filter:blur(4px); padding:3px 8px; border-radius:999px; border:1px solid rgba(255,255,255,.25);
 }
 .carousel-arrow{
-  position:absolute; top:50%; transform:translateY(-50%); z-index:8;
-  width:28px; height:28px; border-radius:50%;
-  background:rgba(11,70,48,.65); color:#fff; border:1px solid rgba(255,255,255,.35);
-  display:flex; align-items:center; justify-content:center; font-size:15px;
+  position:absolute; top:50%; transform:translateY(-50%); z-index:8; width:28px; height:28px; border-radius:50%;
+  background:rgba(11,70,48,.65); color:#fff; border:1px solid rgba(255,255,255,.35); display:flex; align-items:center; justify-content:center; font-size:15px;
 }
 .carousel-arrow:hover{ background:rgba(11,70,48,.9); }
 .carousel-arrow.prev{ left:8px; }
 .carousel-arrow.next{ right:8px; }
-.carousel-dots{
-  position:absolute; bottom:8px; left:0; right:0; z-index:6;
-  display:flex; justify-content:center; gap:5px;
-  pointer-events:none;
-}
+.carousel-dots{ position:absolute; bottom:8px; left:0; right:0; z-index:6; display:flex; justify-content:center; gap:5px; pointer-events:none; }
 .carousel-dots span{ width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,.5); }
 .carousel-dots span.active{ background:#fff; }
-
-/* =================== EMPTY / LOADING =================== */
-.state-box{
-  text-align:center; padding:60px 20px; color:var(--ink-soft);
-}
+.state-box{ text-align:center; padding:60px 20px; color:var(--ink-soft); }
 .state-box .icon{ font-size:44px; margin-bottom:12px; }
 .spinner{
-  width:34px; height:34px; border-radius:50%;
-  border:4px solid var(--mint-200); border-top-color:var(--jade-600, var(--jade-500));
+  width:34px; height:34px; border-radius:50%; border:4px solid var(--mint-200); border-top-color:var(--jade-600, var(--jade-500));
   margin:0 auto 14px; animation:spin 1s linear infinite;
 }
 @keyframes spin{ to{ transform:rotate(360deg); } }
-
-/* =================== MODAL VIEWER =================== */
 .modal-overlay{
-  position:fixed; inset:0; z-index:100;
-  background:rgba(12,26,20,.86); backdrop-filter:blur(6px);
+  position:fixed; inset:0; z-index:100; background:rgba(12,26,20,.86); backdrop-filter:blur(6px);
   display:none; align-items:center; justify-content:center; padding:20px;
 }
 .modal-overlay.active{ display:flex; }
 .modal-panel{
-  width:100%; max-width:900px; max-height:92vh;
-  background:var(--paper-2); border-radius:18px; overflow:hidden;
-  display:flex; flex-direction:column;
-  border:1px solid var(--gold-light);
-  box-shadow:0 30px 70px -20px rgba(0,0,0,.5);
-  animation: modalIn .3s ease;
+  width:100%; max-width:900px; max-height:92vh; background:var(--paper-2); border-radius:18px; overflow:hidden;
+  display:flex; flex-direction:column; border:1px solid var(--gold-light); box-shadow:0 30px 70px -20px rgba(0,0,0,.5); animation: modalIn .3s ease;
 }
 @keyframes modalIn{ from{opacity:0; transform:scale(.94);} to{opacity:1; transform:none;} }
 .modal-head{
-  display:flex; align-items:center; justify-content:space-between; gap:10px;
-  padding:14px 18px; border-bottom:1px solid var(--mint-200);
+  display:flex; align-items:center; justify-content:space-between; gap:10px; padding:14px 18px; border-bottom:1px solid var(--mint-200);
   background:linear-gradient(90deg, var(--mint-100), var(--paper-2));
 }
 .modal-head h4{ font-family:var(--font-display); font-size:16px; color:var(--jade-900); }
 .modal-close{
-  background:var(--paper-2); border:1px solid var(--jade-300); color:var(--jade-800);
-  width:32px; height:32px; border-radius:50%; font-size:16px; line-height:1;
+  background:var(--paper-2); border:1px solid var(--jade-300); color:var(--jade-800); width:32px; height:32px; border-radius:50%; font-size:16px; line-height:1;
   display:flex; align-items:center; justify-content:center; flex:0 0 auto;
 }
 .modal-close:hover{ background:var(--mint-200); }
-
-.modal-body{
-  flex:1; overflow:auto; background:#0f1c16;
-  display:flex; align-items:center; justify-content:center; min-height:220px;
-  position:relative;
-}
+.modal-body{ flex:1; overflow:auto; background:#0f1c16; display:flex; align-items:center; justify-content:center; min-height:220px; position:relative; }
 .modal-body video{ width:100%; max-height:78vh; background:#000; }
 .modal-body audio{ width:90%; max-width:520px; }
 .modal-body iframe{ width:100%; height:78vh; border:none; background:#fff; }
@@ -442,16 +256,10 @@ main{ position:relative; z-index:2; max-width:1180px; margin:0 auto; padding:10p
 .modal-body .carousel-slide iframe{ height:100%; }
 .modal-fallback{ color:var(--mint-100); text-align:center; padding:40px; font-size:13.5px; }
 .modal-fallback a{ color:var(--gold-light); font-weight:600; }
-
-/* Layar penuh untuk preview (docx/xlsx/pdf/dll jadi lega dilihat).
-   .pseudo-fullscreen adalah FALLBACK pakai CSS biasa (bukan Fullscreen
-   API asli) -- dipakai kalau situs ini ditanam via <iframe> (mis. di
-   Google Sites) yang biasanya BLOKIR Fullscreen API browser. */
 .modal-panel:fullscreen,
 .modal-panel:-webkit-full-screen,
 .modal-panel.pseudo-fullscreen{
-  max-width:100vw; max-height:100vh; width:100vw; height:100vh; border-radius:0;
-  position:fixed; inset:0; z-index:200;
+  max-width:100vw; max-height:100vh; width:100vw; height:100vh; border-radius:0; position:fixed; inset:0; z-index:200;
 }
 .modal-panel:fullscreen .modal-body,
 .modal-panel:-webkit-full-screen .modal-body,
@@ -470,56 +278,28 @@ main{ position:relative; z-index:2; max-width:1180px; margin:0 auto; padding:10p
 .modal-panel.pseudo-fullscreen .modal-body .carousel-track{
   height:100% !important;
 }
-
-/* Badge tipe/urutan file (mis. "Word (DOCX) · 1/2") cuma dipakai di
-   kartu daftar tugas -- di dalam modal preview harus disembunyikan
-   karena bakal nutupin isi dokumen/gambar aslinya */
 .modal-body .slide-badge{ display:none; }
-
-/* --- Zoom & pan untuk gambar di modal (support HP: pinch + drag,
-       laptop: scroll wheel + klik + drag) --- */
-.zoom-wrap{
-  position:relative; width:100%; height:78vh; overflow:hidden;
-  display:flex; align-items:center; justify-content:center;
-  touch-action:none;
-}
+.zoom-wrap{ position:relative; width:100%; height:78vh; overflow:hidden; display:flex; align-items:center; justify-content:center; touch-action:none; }
 .zoom-wrap img.zoomable{
-  max-width:100%; max-height:100%; object-fit:contain;
-  transform-origin:center center;
-  user-select:none; -webkit-user-drag:none;
-  transition:transform .12s ease-out;
-  will-change:transform;
+  max-width:100%; max-height:100%; object-fit:contain; transform-origin:center center;
+  user-select:none; -webkit-user-drag:none; transition:transform .12s ease-out; will-change:transform;
 }
 .zoom-wrap img.zoomable.no-anim{ transition:none; }
 .zoom-hint{
-  position:absolute; top:12px; left:50%; transform:translateX(-50%);
-  z-index:5; font-size:11px; color:#eafbf1; background:rgba(11,70,48,.6);
-  padding:5px 12px; border-radius:999px; backdrop-filter:blur(4px);
-  pointer-events:none; opacity:.9;
+  position:absolute; top:12px; left:50%; transform:translateX(-50%); z-index:5; font-size:11px; color:#eafbf1;
+  background:rgba(11,70,48,.6); padding:5px 12px; border-radius:999px; backdrop-filter:blur(4px); pointer-events:none; opacity:.9;
 }
-.zoom-controls{
-  position:absolute; bottom:14px; right:14px; z-index:9;
-  display:flex; gap:6px;
-}
+.zoom-controls{ position:absolute; bottom:14px; right:14px; z-index:9; display:flex; gap:6px; }
 .zoom-controls button{
-  width:34px; height:34px; border-radius:50%;
-  border:1px solid rgba(255,255,255,.35);
+  width:34px; height:34px; border-radius:50%; border:1px solid rgba(255,255,255,.35);
   background:rgba(11,70,48,.72); color:#fff; font-size:16px; font-weight:700;
-  display:flex; align-items:center; justify-content:center;
-  backdrop-filter:blur(4px);
+  display:flex; align-items:center; justify-content:center; backdrop-filter:blur(4px);
 }
 .zoom-controls button:hover{ background:rgba(11,70,48,.92); }
-
-.modal-foot{
-  padding:14px 18px; border-top:1px solid var(--mint-200);
-  display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;
-}
+.modal-foot{ padding:14px 18px; border-top:1px solid var(--mint-200); display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; }
 .modal-meta{ font-size:12px; color:var(--ink-soft); max-width:60%; }
 .modal-meta b{ color:var(--gold); }
-
-footer.site-footer{
-  text-align:center; padding:30px 10px 50px; color:var(--ink-soft); font-size:12px; position:relative; z-index:2;
-}
+footer.site-footer{ text-align:center; padding:30px 10px 50px; color:var(--ink-soft); font-size:12px; position:relative; z-index:2; }
 </style>
 </head>
 <body>
@@ -544,7 +324,6 @@ footer.site-footer{
 </div>
 
 <main>
-  <!-- ===================== SCREEN 1: HOME ===================== -->
   <section id="screen-home" class="screen active">
     <div class="hero">
       <div class="moon-gate"></div>
@@ -552,7 +331,6 @@ footer.site-footer{
       <p class="sub">Silakan pilih kelompok mata pelajaran untuk melihat kumpulan tugas.</p>
       <div class="divider"></div>
     </div>
-
     <div class="choice-grid">
       <div class="choice-card" onclick="showSubjects('wajib')">
         <div class="choice-icon">🖌️</div>
@@ -569,7 +347,6 @@ footer.site-footer{
     </div>
   </section>
 
-  <!-- ===================== SCREEN 2: SUBJECT LIST ===================== -->
   <section id="screen-subjects" class="screen">
     <div class="toolbar">
       <button class="back-btn" onclick="goHome()">← Beranda</button>
@@ -581,7 +358,6 @@ footer.site-footer{
     <div class="subject-grid" id="subject-grid"></div>
   </section>
 
-  <!-- ===================== SCREEN 3: TASK LIST ===================== -->
   <section id="screen-tasks" class="screen">
     <div class="toolbar">
       <button class="back-btn" onclick="showSubjects(state.kelompok)">← Daftar Mapel</button>
@@ -595,12 +371,10 @@ footer.site-footer{
     </div>
     <div class="task-grid" id="task-grid"></div>
   </section>
-
 </main>
 
 <footer class="site-footer">书山有路勤为径 · dibuat untuk portofolio sekolah, data tersinkron dari Google Sheet</footer>
 
-<!-- ===================== MODAL VIEWER ===================== -->
 <div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this) closeModal()">
   <div class="modal-panel">
       <div class="modal-head">
@@ -620,9 +394,6 @@ footer.site-footer{
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script>
-/* ============================================================
-   KONFIGURASI
-   ============================================================ */
 const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT6rETgCM3hP2GMkDmCOWQ3liIglsN-A77qX1VNQYdJtRQywVUFJcp9g77Ylr6PDz0ORz11wwwAKW8R/pub?output=csv";
 
 const WAJIB_ORDER = [
@@ -632,36 +403,23 @@ const WAJIB_ORDER = [
 const PILIHAN_ORDER = [
   "Geografi","Matematika Tingkat Lanjut","Bahasa Inggris Tingkat Lanjut","Informatika"
 ];
-
 const SUBJECT_ICONS = {
   "PKN":"🏛️", "Bahasa Indonesia":"📖", "Bahasa Inggris":"🔤", "Sejarah":"🏺",
   "Seni Budaya":"🎭", "Matematika Umum":"➗", "Agama Kristen (Pa-K)":"✝️",
   "Bimbingan Konseling (BK)":"🧭", "Geografi":"🗺️", "Matematika Tingkat Lanjut":"📐",
   "Bahasa Inggris Tingkat Lanjut":"🌐", "Informatika":"💻"
 };
-
-/* Tambah xlsx & docx di sini -> otomatis dapat ikon, label, dan
-   filter dropdown yang sesuai di seluruh halaman. */
 const TYPE_ICONS  = { image:"🖼️", video:"🎬", audio:"🎵", pdf:"📄", pptx:"📽️", xlsx:"📊", docx:"📝", txt:"📃", csv:"📈", zip:"🗜️", mixed:"🗂️", other:"📁" };
 const TYPE_LABELS = { image:"Gambar", video:"Video / MP4", audio:"Audio", pdf:"PDF", pptx:"PowerPoint (PPTX)", xlsx:"Excel (XLSX)", docx:"Word (DOCX)", txt:"Teks (TXT)", csv:"CSV", zip:"ZIP/Arsip", mixed:"Campuran", other:"File" };
 
-/* ============================================================
-   STATE
-   ============================================================ */
 let state = { all: [], kelompok: null, subject: null };
 
-/* ============================================================
-   UTIL
-   ============================================================ */
 function normalizeKelompok(v){
   v = (v||"").toLowerCase();
   if(v.includes("wajib")) return "wajib";
   if(v.includes("pilih")) return "pilihan";
   return "wajib";
 }
-
-/* Deteksi tipe file umum berdasar teks hint kolom "Tipe File" saja
-   (dipakai kalau URL-nya tidak punya ekstensi jelas, mis. link Drive) */
 function normalizeType(tipe, url){
   const t = (tipe||"").toLowerCase();
   const u = (url||"").toLowerCase();
@@ -677,10 +435,6 @@ function normalizeType(tipe, url){
   if(t.includes("gambar") || t.includes("foto") || t.includes("image") || t.includes("png") || t.includes("jpg") || t.includes("jpeg") || u.match(/\.(png|jpe?g|gif|webp|svg|bmp)$/)) return "image";
   return "other";
 }
-
-/* Deteksi tipe PER-LINK, diutamakan dari ekstensi URL-nya sendiri.
-   Kalau linknya tidak punya ekstensi (misal hosting tanpa .jpg/.mp4),
-   baru pakai hint dari kolom "Tipe File" sebagai fallback. */
 function detectUrlType(url, tipeHint){
   const u = (url||"").toLowerCase();
   if(u.match(/\.pdf(\?|$)/)) return "pdf";
@@ -695,14 +449,6 @@ function detectUrlType(url, tipeHint){
   if(u.match(/\.(png|jpe?g|gif|webp|svg|bmp)(\?|$)/)) return "image";
   return normalizeType(tipeHint, "");
 }
-
-/* Deteksi link Google Drive / Google Docs-Sheets-Slides.
-   Semua link Google itu polanya https://drive-atau-docs.google.com/<jenis>/d/<ID>/...
-   Dari situ kita bisa bikin:
-   - preview  -> ditanam di <iframe>, Drive punya viewer bawaan yang
-                 bisa render pdf/doc/xlsx/pptx/gambar/video + zoom sendiri
-   - thumbnail-> dipakai sebagai gambar kecil di kartu daftar tugas
-   - download -> link unduh langsung */
 function driveInfo(url){
   const m = (url||"").match(/^https:\/\/(?:drive|docs)\.google\.com\/[a-zA-Z]+\/d\/([a-zA-Z0-9_-]+)/);
   if(!m) return null;
@@ -715,38 +461,24 @@ function driveInfo(url){
     download: `https://drive.google.com/uc?export=download&id=${id}`
   };
 }
-
-/* Link unduh yang benar untuk 1 item (Drive vs hosting biasa) */
 function getDownloadUrl(item){
   if(!item) return '#';
   return item.drive ? item.drive.download : item.url;
 }
-
-/* Link PREVIEW yang benar untuk 1 item -- dipakai buat buka tab baru.
-   docx/xlsx/pptx/csv diarahkan ke Google Docs/Sheets Viewer (lega,
-   full-page, gak kesempit di card/modal kamu). Link Drive diarahkan
-   ke viewer bawaan Drive. Sisanya (pdf/gambar/video/txt) langsung ke
-   file aslinya -- browser modern sudah bisa menampilkannya sendiri. */
-function getPreviewUrl(item){
+function getExternalPreviewUrl(item){
   if(!item) return '#';
-  if(item.drive) return item.drive.preview;
+  if(item.drive) return item.url;
   if(item.tipe === 'pptx' || item.tipe === 'xlsx' || item.tipe === 'docx' || item.tipe === 'csv'){
     return googleViewerSrc(item.url);
   }
   return item.url;
 }
-/* Preview docx/xlsx/pptx pakai Google Docs Viewer, jadi yang muncul
-   PRATINJAU langsung (kayak buka di Google Docs/Spreadsheet), bukan
-   malah kepicu download di HP/laptop — sama kayak tipe file lain. */
 function googleViewerSrc(url){
   return "https://docs.google.com/viewer?url=" + encodeURIComponent(url) + "&embedded=true";
 }
-
-/* Pecah kolom Url yang berisi banyak link dipisah koma */
 function parseUrls(raw){
   return (raw||"").split(",").map(s => s.trim()).filter(Boolean);
 }
-
 function todayFormatted(){
   const d = new Date();
   const dd = String(d.getDate()).padStart(2, '0');
@@ -754,19 +486,13 @@ function todayFormatted(){
   const yyyy = d.getFullYear();
   return `${dd}/${mm}/${yyyy}`;
 }
-
 function escapeHtml(s){
   return (s||"").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
-
-/* Semua mapel di kelompok ini selalu ditampilkan, walau belum ada tugasnya */
 function orderedSubjects(kelompok){
   return kelompok === "wajib" ? WAJIB_ORDER : PILIHAN_ORDER;
 }
 
-/* ============================================================
-   FETCH DATA
-   ============================================================ */
 function loadData(){
   Papa.parse(SHEET_URL, {
     download: true,
@@ -780,12 +506,10 @@ function loadData(){
         .map(r => {
           const urls = parseUrls(r["Url"]);
           const tipeRaw = r["Tipe File"] || "";
-                    const tipeHints = parseUrls(tipeRaw); // boleh diisi banyak, dipisah koma, urutan harus sama kek Url
+          const tipeHints = parseUrls(tipeRaw);
           const items = urls.map((u, i) => {
             const drive = driveInfo(u);
             const hint = tipeHints[i] || tipeHints[0] || "";
-            // link Drive nyaris tidak pernah punya ekstensi di URL-nya,
-            // jadi tipe filenya diambil dari hint kolom "Tipe File"
             const tipe = drive ? normalizeType(hint, "") : detectUrlType(u, hint);
             return { url: u, tipe, drive };
           });
@@ -808,7 +532,6 @@ function loadData(){
           };
         });
       updateHomeCounts();
-      // Jika sedang berada di layar subjek/tugas, refresh tampilan
       if(document.getElementById('screen-subjects').classList.contains('active')) renderSubjects();
       if(document.getElementById('screen-tasks').classList.contains('active')) renderTasks();
     },
@@ -827,15 +550,11 @@ function updateHomeCounts(){
   document.getElementById('count-pilihan').textContent = pilihan + " tugas";
 }
 
-/* ============================================================
-   NAVIGASI
-   ============================================================ */
 function setActiveScreen(id){
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   window.scrollTo({top:0, behavior:'smooth'});
 }
-
 function renderBreadcrumb(){
   const bc = document.getElementById('breadcrumb');
   let html = `<button onclick="goHome()">Beranda</button>`;
@@ -847,20 +566,17 @@ function renderBreadcrumb(){
   }
   bc.innerHTML = html;
 }
-
 function goHome(){
   state.kelompok = null; state.subject = null;
   renderBreadcrumb();
   setActiveScreen('screen-home');
 }
-
 function showSubjects(kelompok){
   state.kelompok = kelompok; state.subject = null;
   renderBreadcrumb();
   setActiveScreen('screen-subjects');
   renderSubjects();
 }
-
 function showTasks(subject){
   state.subject = subject;
   renderBreadcrumb();
@@ -868,18 +584,13 @@ function showTasks(subject){
   renderTasks(true);
 }
 
-/* ============================================================
-   RENDER: SUBJECT GRID (selalu tampilkan semua mapel)
-   ============================================================ */
 function renderSubjects(){
   const title = document.getElementById('subjects-title');
   const sub = document.getElementById('subjects-sub');
   title.textContent = state.kelompok === 'wajib' ? '🖌️ Mapel Wajib' : '🎋 Mapel Pilihan';
   sub.textContent = 'Pilih mata pelajaran untuk melihat kumpulan tugasnya';
-
   const rows = state.all.filter(r => r.kelompok === state.kelompok);
   const list = orderedSubjects(state.kelompok);
-
   const grid = document.getElementById('subject-grid');
   grid.innerHTML = list.map(subj => {
     const count = rows.filter(r => r.mapel === subj).length;
@@ -894,28 +605,21 @@ function renderSubjects(){
   }).join('');
 }
 
-/* ============================================================
-   RENDER: TASK GRID
-   ============================================================ */
 function renderTasks(rebuildFilter){
   const title = document.getElementById('tasks-title');
   const sub = document.getElementById('tasks-sub');
   const icon = SUBJECT_ICONS[state.subject] || "📚";
   title.textContent = `${icon} ${state.subject}`;
-
   let rows = state.all.filter(r => r.kelompok === state.kelompok && r.mapel === state.subject);
   sub.textContent = `${rows.length} tugas ditemukan`;
-
   if(rebuildFilter){
     const typesPresent = [...new Set(rows.map(r => r.tipe))];
     const sel = document.getElementById('type-filter');
     sel.innerHTML = '<option value="all">Semua Tipe File</option>' +
       typesPresent.map(t => `<option value="${t}">${TYPE_ICONS[t]} ${TYPE_LABELS[t]}</option>`).join('');
   }
-
   const filterVal = document.getElementById('type-filter').value || "all";
   if(filterVal !== "all") rows = rows.filter(r => r.tipe === filterVal);
-
   const grid = document.getElementById('task-grid');
   if(rows.length === 0){
     const msg = filterVal === 'all'
@@ -924,23 +628,12 @@ function renderTasks(rebuildFilter){
     grid.innerHTML = `<div class="state-box" style="grid-column:1/-1;"><div class="icon">🍃</div>${msg}</div>`;
     return;
   }
-
-   grid.innerHTML = rows.map((r) => {
+  grid.innerHTML = rows.map((r) => {
     const idx = state.all.indexOf(r);
     const previewHtml = buildCardPreview(r);
     const firstItem = r.items && r.items.length ? r.items[0] : null;
     const downloadUrl = firstItem ? getDownloadUrl(firstItem) : '#';
-
-    // Gambar/video dibuka di modal internal (support zoom/pan, aman
-    // dari masalah nested-iframe). Selain itu (pdf/pptx/xlsx/docx/
-    // csv/txt/Drive/mixed) dibuka di TAB BARU ke viewer aslinya --
-    // supaya lega dilihat & gak kena block waktu situs ini ditanam
-    // berlapis di Google Sites.
-    const useInlineModal = firstItem && (r.tipe === 'image' || r.tipe === 'video');
-    const lihatHtml = useInlineModal
-      ? `<button class="btn btn-primary" onclick="openModal(${idx})">👁 Lihat</button>`
-      : `<a class="btn btn-primary" href="${escapeHtml(getPreviewUrl(firstItem))}" target="_blank" rel="noopener">👁 Lihat</a>`;
-
+    const previewUrl = firstItem ? getExternalPreviewUrl(firstItem) : '#';
     return `
       <div class="task-card">
         <div class="task-preview">
@@ -953,7 +646,10 @@ function renderTasks(rebuildFilter){
           <div class="task-desc">${escapeHtml(r.deskripsi)}</div>
         </div>
         <div class="task-actions">
-          ${lihatHtml}
+          <div class="action-row">
+            <a class="btn btn-gold" href="${escapeHtml(previewUrl)}" target="_blank" rel="noopener">🔗 Preview</a>
+            <button class="btn btn-primary" onclick="openModal(${idx})">👁 Lihat</button>
+          </div>
           <a class="btn btn-ghost" href="${escapeHtml(downloadUrl)}" target="_blank" rel="noopener" download>⬇ Unduh</a>
         </div>
       </div>`;
@@ -961,9 +657,6 @@ function renderTasks(rebuildFilter){
   setupAutoplayObserver();
 }
 
-/* Bikin satu ikon/thumbnail untuk sebuah item (dipakai di kartu preview).
-   Link Drive selalu pakai thumbnail resmi dari Google (kerja untuk
-   gambar, video, pdf, docx, xlsx, pptx sekaligus -> hemat & universal). */
 function cardSlideMedia(item, judul){
   if(item.drive){
     return `<img src="${escapeHtml(item.drive.thumb)}" loading="lazy" alt="${escapeHtml(judul)}" referrerpolicy="no-referrer" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'file-icon',textContent:'${TYPE_ICONS[item.tipe]||'📁'}'}))">`;
@@ -974,26 +667,20 @@ function cardSlideMedia(item, judul){
   if(item.tipe === 'video'){
     return `<video src="${escapeHtml(item.url)}" muted loop playsinline preload="metadata" class="autovid"></video>`;
   }
-  // pdf / pptx / xlsx / docx / other -> tidak bisa dithumbnail kecil, tampilkan ikon
   return `<div class="file-icon">${TYPE_ICONS[item.tipe]}</div>`;
 }
-
-/* Bangun preview kartu: satu media biasa, atau carousel kalau item > 1 */
 function buildCardPreview(r){
   const items = r.items && r.items.length ? r.items : [];
   if(items.length === 0) return `<div class="file-icon">${TYPE_ICONS[r.tipe]}</div>`;
-
   if(items.length === 1){
     return cardSlideMedia(items[0], r.judul);
   }
-
   const slides = items.map((it,i) => `
     <div class="carousel-slide${i===0?' active':''}" data-slide="${i}">
       ${cardSlideMedia(it, r.judul)}
       <span class="slide-badge">${TYPE_ICONS[it.tipe]} ${i+1}/${items.length}</span>
     </div>`).join('');
   const dots = items.map((_,i) => `<span class="${i===0?'active':''}" data-dot="${i}"></span>`).join('');
-
   return `
     <div class="carousel-track" data-carousel>
       ${slides}
@@ -1002,7 +689,6 @@ function buildCardPreview(r){
       <div class="carousel-dots">${dots}</div>
     </div>`;
 }
-
 function moveCarousel(btn, dir){
   const track = btn.closest('[data-carousel]');
   const slides = [...track.querySelectorAll('.carousel-slide')];
@@ -1012,8 +698,6 @@ function moveCarousel(btn, dir){
   cur = (cur + dir + slides.length) % slides.length;
   slides[cur].classList.add('active'); if(dots[cur]) dots[cur].classList.add('active');
 }
-
-/* Autoplay video hanya saat kartu terlihat di layar (hemat performa) */
 function setupAutoplayObserver(){
   const vids = document.querySelectorAll('.autovid');
   if(!('IntersectionObserver' in window)){
@@ -1029,16 +713,6 @@ function setupAutoplayObserver(){
   vids.forEach(v => io.observe(v));
 }
 
-/* ============================================================
-   MODAL VIEWER
-   ============================================================ */
-/* Bikin isi 1 slide modal sesuai tipe item-nya.
-   - Link Drive: langsung pakai viewer bawaan Google (support zoom &
-     scroll sendiri untuk semua jenis file, paling stabil).
-   - Gambar dari hosting luar: dibungkus .zoom-wrap supaya bisa
-     di-zoom & digeser manual (lihat initZoomableImages di bawah).
-   - PDF dari hosting luar: iframe langsung.
-   - PPTX/XLSX/DOCX dari hosting luar: iframe Office Online Viewer. */
 function modalSlideContent(item, judul){
   if(item.drive){
     return `<iframe src="${escapeHtml(item.drive.preview)}" allow="autoplay" allowfullscreen></iframe>`;
@@ -1054,7 +728,7 @@ function modalSlideContent(item, judul){
       </div>
     </div>`;
   }
-   if(item.tipe === 'video'){
+  if(item.tipe === 'video'){
     return `<video src="${escapeHtml(item.url)}" controls playsinline></video>`;
   }
   if(item.tipe === 'audio'){
@@ -1063,8 +737,7 @@ function modalSlideContent(item, judul){
   if(item.tipe === 'pdf'){
     return `<iframe src="${escapeHtml(item.url)}"></iframe>`;
   }
-if(item.tipe === 'pptx' || item.tipe === 'xlsx' || item.tipe === 'docx'){
-    // Preview langsung lewat Google Docs/Sheets/Slides viewer, bukan download
+  if(item.tipe === 'pptx' || item.tipe === 'xlsx' || item.tipe === 'docx'){
     return `<iframe src="${googleViewerSrc(item.url)}"></iframe>`;
   }
   if(item.tipe === 'txt'){
@@ -1075,20 +748,17 @@ if(item.tipe === 'pptx' || item.tipe === 'xlsx' || item.tipe === 'docx'){
   }
   return `<div class="modal-fallback">Format file ini (${TYPE_LABELS[item.tipe]||'tidak dikenal'}) belum bisa dipratinjau langsung.<br><a href="${escapeHtml(item.url)}" target="_blank" rel="noopener">Buka / unduh file di tab baru →</a></div>`;
 }
-  
+
 function openModal(idx){
   const r = state.all[idx];
   if(!r) return;
   document.getElementById('modal-title').textContent = r.judul;
   document.getElementById('modal-meta').innerHTML =
     `<b>${escapeHtml(r.mapel)}</b> · 🗓️ ${escapeHtml(r.tanggal)}<br>${escapeHtml(r.deskripsi)}`;
-
   const items = r.items && r.items.length ? r.items : [];
   const dl = document.getElementById('modal-download');
   dl.href = items[0] ? getDownloadUrl(items[0]) : '#';
-
   const body = document.getElementById('modal-body');
-
   if(items.length === 0){
     body.innerHTML = `<div class="modal-fallback">Belum ada file yang ditautkan untuk tugas ini.</div>`;
   } else if(items.length === 1){
@@ -1112,33 +782,23 @@ function openModal(idx){
         <div class="carousel-dots">${dots}</div>
       </div>`;
   }
-
-  // Aktifkan zoom & pan untuk semua gambar hasil hosting luar di modal ini
   initZoomableImages(body);
-
   document.getElementById('modal-overlay').classList.add('active');
   document.body.style.overflow = 'hidden';
 }
-
-/* Sama seperti moveCarousel, tapi juga pause video slide lama
-   & update tombol Unduh supaya mengikuti file yang sedang tampil */
 function modalCarouselMove(btn, dir){
   const track = btn.closest('[data-carousel]');
   const slides = [...track.querySelectorAll('.carousel-slide')];
   const dots = [...track.querySelectorAll('[data-dot]')];
   let cur = slides.findIndex(s => s.classList.contains('active'));
-
   const oldVid = slides[cur].querySelector('video');
   if(oldVid) oldVid.pause();
-
   slides[cur].classList.remove('active'); if(dots[cur]) dots[cur].classList.remove('active');
   cur = (cur + dir + slides.length) % slides.length;
   slides[cur].classList.add('active'); if(dots[cur]) dots[cur].classList.add('active');
-
   const dl = document.getElementById('modal-download');
   if(dl && slides[cur].dataset.download) dl.href = slides[cur].dataset.download;
 }
-
 function closeModal(){
   const panel = document.querySelector('.modal-panel');
   if(document.fullscreenElement || document.webkitFullscreenElement){
@@ -1150,19 +810,11 @@ function closeModal(){
   document.body.style.overflow = '';
 }
 document.addEventListener('keydown', e => { if(e.key === 'Escape') closeModal(); });
-
-/* Coba Fullscreen API asli dulu. Kalau situs ini ditanam via <iframe>
-   tanpa atribut allowfullscreen (kasus umum kalau di-embed di Google
-   Sites), browser bakal nolak/gagal diam-diam -- makanya ada fallback
-   "layar penuh semu" pakai CSS (.pseudo-fullscreen) yang selalu jalan
-   di kondisi apa pun. */
 function toggleFullscreen(){
   const panel = document.querySelector('.modal-panel');
   if(!panel) return;
-
   const isCssFs = panel.classList.contains('pseudo-fullscreen');
   const isRealFs = document.fullscreenElement || document.webkitFullscreenElement;
-
   if(isCssFs || isRealFs){
     if(isRealFs){
       (document.exitFullscreen || document.webkitExitFullscreen || function(){}).call(document);
@@ -1171,7 +823,6 @@ function toggleFullscreen(){
     updateFullscreenIcon();
     return;
   }
-
   const req = panel.requestFullscreen || panel.webkitRequestFullscreen;
   if(!req || document.fullscreenEnabled === false){
     panel.classList.add('pseudo-fullscreen');
@@ -1202,18 +853,10 @@ function updateFullscreenIcon(){
 document.addEventListener('fullscreenchange', updateFullscreenIcon);
 document.addEventListener('webkitfullscreenchange', updateFullscreenIcon);
 
-/* ============================================================
-   ZOOM & PAN GAMBAR DI MODAL
-   Support: scroll wheel (laptop), klik untuk zoom-in bertahap,
-   drag mouse untuk geser (laptop), pinch 2 jari + drag 1 jari
-   untuk geser (HP), double click/double tap untuk toggle zoom.
-   Tombol +/-/reset di pojok kanan bawah untuk fallback manual.
-   ============================================================ */
 function touchDist(t){
   const dx = t[0].clientX - t[1].clientX, dy = t[0].clientY - t[1].clientY;
   return Math.sqrt(dx*dx + dy*dy);
 }
-
 function applyZoomFromData(img){
   const s = parseFloat(img.dataset.scale || '1');
   const tx = parseFloat(img.dataset.tx || '0');
@@ -1221,15 +864,12 @@ function applyZoomFromData(img){
   img.style.transform = `translate(${tx}px, ${ty}px) scale(${s})`;
   img.style.cursor = s > 1 ? 'grab' : 'zoom-in';
 }
-
 function setImgScale(img, scale){
   scale = Math.min(12, Math.max(1, scale));
   img.dataset.scale = scale;
   if(scale === 1){ img.dataset.tx = 0; img.dataset.ty = 0; }
   applyZoomFromData(img);
 }
-
-/* Tombol manual di pojok modal */
 function zoomStep(btn, dir){
   const img = btn.closest('.zoom-wrap').querySelector('img.zoomable');
   if(!img) return;
@@ -1242,28 +882,20 @@ function zoomReset(btn){
   img.classList.remove('no-anim');
   setImgScale(img, 1);
 }
-
-/* Pasang semua event gesture ke setiap <img class="zoomable"> yang
-   baru dimasukkan ke modal (dipanggil sekali per render modal) */
 function initZoomableImages(container){
   container.querySelectorAll('img.zoomable').forEach(img => {
-    if(img.dataset.zoomInit) return; // jangan pasang dobel
+    if(img.dataset.zoomInit) return;
     img.dataset.zoomInit = '1';
     img.dataset.scale = '1'; img.dataset.tx = '0'; img.dataset.ty = '0';
     applyZoomFromData(img);
-
     let dragging = false, startX = 0, startY = 0, startTx = 0, startTy = 0;
     let pinchDist = null, pinchStartScale = 1;
-
-    // Scroll wheel (laptop/desktop)
     img.addEventListener('wheel', e => {
       e.preventDefault();
       img.classList.remove('no-anim');
       const delta = e.deltaY < 0 ? 0.25 : -0.25;
       setImgScale(img, parseFloat(img.dataset.scale) + delta);
     }, { passive:false });
-
-    // Klik untuk zoom-in cepat, double click untuk toggle
     img.addEventListener('dblclick', () => {
       img.classList.remove('no-anim');
       setImgScale(img, parseFloat(img.dataset.scale) > 1 ? 1 : 2.4);
@@ -1275,8 +907,6 @@ function initZoomableImages(container){
         setImgScale(img, 2);
       }
     });
-
-    // Drag pakai mouse (laptop)
     img.addEventListener('mousedown', e => {
       if(parseFloat(img.dataset.scale) <= 1) return;
       dragging = true;
@@ -1294,8 +924,6 @@ function initZoomableImages(container){
     window.addEventListener('mouseup', () => {
       if(dragging){ dragging = false; img.classList.remove('no-anim'); }
     });
-
-    // Pinch zoom + drag pakai jari (HP/tablet)
     let lastTap = 0;
     img.addEventListener('touchstart', e => {
       if(e.touches.length === 2){
@@ -1317,7 +945,6 @@ function initZoomableImages(container){
         }
       }
     }, { passive:true });
-
     img.addEventListener('touchmove', e => {
       if(e.touches.length === 2 && pinchDist){
         const d = touchDist(e.touches);
@@ -1330,7 +957,6 @@ function initZoomableImages(container){
         e.preventDefault();
       }
     }, { passive:false });
-
     img.addEventListener('touchend', e => {
       if(e.touches.length < 2) pinchDist = null;
       if(e.touches.length === 0 && dragging){ dragging = false; img.classList.remove('no-anim'); }
@@ -1338,9 +964,6 @@ function initZoomableImages(container){
   });
 }
 
-/* ============================================================
-   ANIMASI DAUN JATUH
-   ============================================================ */
 function spawnLeaf(){
   const layer = document.getElementById('leaves-layer');
   const leaf = document.createElement('div');
@@ -1362,11 +985,8 @@ if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
   for(let i=0;i<6;i++) setTimeout(spawnLeaf, i*300);
 }
 
-/* ============================================================
-   START
-   ============================================================ */
 loadData();
-setInterval(loadData, 5 * 60 * 1000); // auto-refresh tiap 5 menit
+setInterval(loadData, 5 * 60 * 1000);
 </script>
 </body>
 </html>
