@@ -416,6 +416,12 @@ const SUBJECT_ICONS = {
 };
 const TYPE_ICONS  = { image:"🖼️", video:"🎬", audio:"🎵", pdf:"📄", pptx:"📽️", xlsx:"📊", docx:"📝", txt:"📃", csv:"📈", zip:"🗜️", mixed:"🗂️", other:"📁" };
 const TYPE_LABELS = { image:"Gambar", video:"Video / MP4", audio:"Audio", pdf:"PDF", pptx:"PowerPoint (PPTX)", xlsx:"Excel (XLSX)", docx:"Word (DOCX)", txt:"Teks (TXT)", csv:"CSV", zip:"ZIP/Arsip", mixed:"Campuran", other:"File" };
+// Label singkat buat teks tombol "Preview <FORMAT>" di kartu.
+const TYPE_SHORT = { image:"Gambar", video:"Video", audio:"Audio", pdf:"PDF", pptx:"PPTX", xlsx:"XLSX", docx:"DOCX", txt:"TXT", csv:"CSV", zip:"ZIP" };
+function previewLabel(tipe){
+  const short = TYPE_SHORT[tipe];
+  return short ? `🔗 Preview ${short}` : `🔗 Preview`;
+}
 // Tipe file yang dipratinjau lewat Google Docs Viewer, biar tampilannya seragam.
 const GOOGLE_VIEWER_TYPES = new Set(["pdf","pptx","xlsx","docx","csv"]);
 
@@ -637,10 +643,12 @@ function renderTasks(rebuildFilter){
   }
   grid.innerHTML = rows.map((r) => {
     const idx = state.all.indexOf(r);
+    // Slide pertama yang aktif di awal render menentukan label badge & tombol Preview.
+    const initialTipe = r.items && r.items.length ? r.items[0].tipe : r.tipe;
     return `
       <div class="task-card" data-task-idx="${idx}">
         <div class="task-preview">
-          <span class="type-badge">${TYPE_ICONS[r.tipe]} ${TYPE_LABELS[r.tipe]}</span>
+          <span class="type-badge">${TYPE_ICONS[initialTipe]} ${TYPE_LABELS[initialTipe]}</span>
           ${buildCardPreview(r)}
         </div>
         <div class="task-body">
@@ -650,7 +658,7 @@ function renderTasks(rebuildFilter){
         </div>
         <div class="task-actions">
           <div class="action-row">
-            <button class="btn btn-gold" onclick="cardPreview(this)">🔗 Preview</button>
+            <button class="btn btn-gold" onclick="cardPreview(this)">${previewLabel(initialTipe)}</button>
             <button class="btn btn-primary" onclick="openModal(${idx})">👁 Lihat</button>
           </div>
           <button class="btn btn-ghost" onclick="cardDownload(this)">⬇ Unduh</button>
@@ -723,11 +731,15 @@ function moveCarousel(btn, dir){
   slides[cur].classList.remove('active'); if(dots[cur]) dots[cur].classList.remove('active');
   cur = (cur + dir + slides.length) % slides.length;
   slides[cur].classList.add('active'); if(dots[cur]) dots[cur].classList.add('active');
-  // Sinkronkan badge tipe file di pojok kiri-atas kartu ke slide yang aktif sekarang.
-  const preview = track.closest('.task-preview');
-  const badge = preview ? preview.querySelector('.type-badge') : null;
+  // Sinkronkan badge tipe file & teks tombol Preview ke slide yang aktif sekarang.
+  const card = track.closest('.task-card');
   const tipe = slides[cur].dataset.tipe;
-  if(badge && tipe) badge.textContent = `${TYPE_ICONS[tipe]} ${TYPE_LABELS[tipe]}`;
+  if(card && tipe){
+    const badge = card.querySelector('.type-badge');
+    if(badge) badge.textContent = `${TYPE_ICONS[tipe]} ${TYPE_LABELS[tipe]}`;
+    const previewBtn = card.querySelector('.task-actions .btn-gold');
+    if(previewBtn) previewBtn.textContent = previewLabel(tipe);
+  }
 }
 function setupAutoplayObserver(){
   const vids = document.querySelectorAll('.autovid');
