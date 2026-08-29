@@ -136,19 +136,25 @@ a{color:inherit;}
   border-bottom:1px solid rgba(15,92,63,.14);
 }
   
-  .running-bar{
-  background:linear-gradient(90deg, var(--jade-800), var(--jade-700));
-  overflow:hidden; white-space:nowrap; position:relative; z-index:15;
-  border-bottom:1px solid rgba(201,162,75,.4);
+.running-bar{
+  position:relative; z-index:15;
+  background:
+    repeating-linear-gradient(135deg, rgba(255,255,255,.05) 0 12px, transparent 12px 24px),
+    linear-gradient(90deg, var(--jade-900), var(--jade-700), var(--jade-900));
+  overflow:hidden; white-space:nowrap;
+  border-top:1px solid rgba(201,162,75,.35);
+  border-bottom:1px solid rgba(201,162,75,.45);
+  box-shadow: inset 0 0 14px rgba(0,0,0,.25);
 }
 .running-track{
   display:inline-block; padding-left:100%;
-  animation: runningText 18s linear infinite;
+  animation: runningText 20s linear infinite;
 }
 .running-track span{
-  color:#EAFBF1; font-size:12.5px; font-weight:600; letter-spacing:.3px;
-  padding:8px 0; display:inline-block;
+  color:var(--gold-light); font-size:12px; font-weight:600; letter-spacing:.4px;
+  padding:7px 0; display:inline-block;
 }
+.running-track .sep-ico{ color:var(--gold); margin:0 12px; }
 @keyframes runningText{
   from{ transform:translateX(0); }
   to{ transform:translateX(-100%); }
@@ -518,7 +524,7 @@ footer.site-footer{
 
 <div class="running-bar">
   <div class="running-track">
-    <span>⚠️ Jangan lupa di refresh jika ada bug &nbsp;&nbsp;•&nbsp;&nbsp; ⚠️ Jangan lupa di refresh jika ada bug &nbsp;&nbsp;•&nbsp;&nbsp; ⚠️ Jangan lupa di refresh jika ada bug &nbsp;&nbsp;•&nbsp;&nbsp;</span>
+    <span>⚠️ Jangan lupa di refresh jika ada bug <span class="sep-ico">🍃</span> ⚠️ Jangan lupa di refresh jika ada bug <span class="sep-ico">🍃</span> ⚠️ Jangan lupa di refresh jika ada bug <span class="sep-ico">🍃</span></span>
   </div>
 </div>
 
@@ -699,6 +705,13 @@ function driveInfo(url){
 function getDownloadUrl(item){
   if(!item) return '#';
   return item.drive ? item.drive.download : item.url;
+}
+
+/* Preview docx/xlsx/pptx pakai Google Docs Viewer, jadi yang muncul
+   PRATINJAU langsung (kayak buka di Google Docs/Spreadsheet), bukan
+   malah kepicu download di HP/laptop — sama kayak tipe file lain. */
+function googleViewerSrc(url){
+  return "https://docs.google.com/viewer?url=" + encodeURIComponent(url) + "&embedded=true";
 }
 
 /* Pecah kolom Url yang berisi banyak link dipisah koma */
@@ -1011,16 +1024,15 @@ function modalSlideContent(item, judul){
   if(item.tipe === 'pdf'){
     return `<iframe src="${escapeHtml(item.url)}"></iframe>`;
   }
-  if(item.tipe === 'pptx' || item.tipe === 'xlsx' || item.tipe === 'docx'){
-    const officeSrc = "https://view.officeapps.live.com/op/embed.aspx?src=" + encodeURIComponent(item.url);
-    return `<iframe src="${officeSrc}"></iframe>`;
+if(item.tipe === 'pptx' || item.tipe === 'xlsx' || item.tipe === 'docx'){
+    // Preview langsung lewat Google Docs/Sheets/Slides viewer, bukan download
+    return `<iframe src="${googleViewerSrc(item.url)}"></iframe>`;
   }
   if(item.tipe === 'txt'){
     return `<iframe src="${escapeHtml(item.url)}"></iframe>`;
   }
   if(item.tipe === 'csv'){
-    const gviewSrc = "https://docs.google.com/viewer?url=" + encodeURIComponent(item.url) + "&embedded=true";
-    return `<iframe src="${gviewSrc}"></iframe>`;
+    return `<iframe src="${googleViewerSrc(item.url)}"></iframe>`;
   }
   return `<div class="modal-fallback">Format file ini (${TYPE_LABELS[item.tipe]||'tidak dikenal'}) belum bisa dipratinjau langsung.<br><a href="${escapeHtml(item.url)}" target="_blank" rel="noopener">Buka / unduh file di tab baru →</a></div>`;
 }
