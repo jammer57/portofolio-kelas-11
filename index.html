@@ -702,7 +702,7 @@ function buildCardPreview(r){
     return cardSlideMedia(items[0], r.judul);
   }
   const slides = items.map((it,i) => `
-    <div class="carousel-slide${i===0?' active':''}" data-slide="${i}">
+    <div class="carousel-slide${i===0?' active':''}" data-slide="${i}" data-tipe="${it.tipe}">
       ${cardSlideMedia(it, r.judul)}
       <span class="slide-badge">${TYPE_ICONS[it.tipe]} ${i+1}/${items.length}</span>
     </div>`).join('');
@@ -723,6 +723,11 @@ function moveCarousel(btn, dir){
   slides[cur].classList.remove('active'); if(dots[cur]) dots[cur].classList.remove('active');
   cur = (cur + dir + slides.length) % slides.length;
   slides[cur].classList.add('active'); if(dots[cur]) dots[cur].classList.add('active');
+  // Sinkronkan badge tipe file di pojok kiri-atas kartu ke slide yang aktif sekarang.
+  const preview = track.closest('.task-preview');
+  const badge = preview ? preview.querySelector('.type-badge') : null;
+  const tipe = slides[cur].dataset.tipe;
+  if(badge && tipe) badge.textContent = `${TYPE_ICONS[tipe]} ${TYPE_LABELS[tipe]}`;
 }
 function setupAutoplayObserver(){
   const vids = document.querySelectorAll('.autovid');
