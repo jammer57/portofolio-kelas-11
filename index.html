@@ -297,8 +297,10 @@ main{ position:relative; z-index:2; max-width:1180px; margin:0 auto; padding:10p
 }
 .zoom-controls button:hover{ background:rgba(11,70,48,.92); }
 .modal-foot{ padding:14px 18px; border-top:1px solid var(--mint-200); display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; }
-.modal-meta{ font-size:12px; color:var(--ink-soft); max-width:60%; }
+.modal-meta{ font-size:12px; color:var(--ink-soft); max-width:56%; }
 .modal-meta b{ color:var(--gold); }
+.modal-foot-actions{ display:flex; gap:8px; flex:none; }
+.modal-foot-actions .btn{ flex:none; padding:10px 18px; }
 footer.site-footer{ text-align:center; padding:30px 10px 50px; color:var(--ink-soft); font-size:12px; position:relative; z-index:2; }
 </style>
 </head>
@@ -377,7 +379,7 @@ footer.site-footer{ text-align:center; padding:30px 10px 50px; color:var(--ink-s
 
 <div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this) closeModal()">
   <div class="modal-panel">
-      <div class="modal-head">
+    <div class="modal-head">
       <h4 id="modal-title">Judul Tugas</h4>
       <div style="display:flex; gap:8px; flex:0 0 auto;">
         <button class="modal-close" id="modal-fullscreen-btn" onclick="toggleFullscreen()" aria-label="Layar penuh" title="Layar penuh">⛶</button>
@@ -387,7 +389,10 @@ footer.site-footer{ text-align:center; padding:30px 10px 50px; color:var(--ink-s
     <div class="modal-body" id="modal-body"></div>
     <div class="modal-foot">
       <div class="modal-meta" id="modal-meta"></div>
-      <a class="btn btn-primary" id="modal-download" href="#" target="_blank" rel="noopener" style="flex:none; padding:10px 18px;">⬇ Unduh File</a>
+      <div class="modal-foot-actions">
+        <a class="btn btn-gold" id="modal-preview" href="#" target="_blank" rel="noopener">🔗 Preview</a>
+        <a class="btn btn-primary" id="modal-download" href="#" target="_blank" rel="noopener">⬇ Unduh File</a>
+      </div>
     </div>
   </div>
 </div>
@@ -411,6 +416,8 @@ const SUBJECT_ICONS = {
 };
 const TYPE_ICONS  = { image:"🖼️", video:"🎬", audio:"🎵", pdf:"📄", pptx:"📽️", xlsx:"📊", docx:"📝", txt:"📃", csv:"📈", zip:"🗜️", mixed:"🗂️", other:"📁" };
 const TYPE_LABELS = { image:"Gambar", video:"Video / MP4", audio:"Audio", pdf:"PDF", pptx:"PowerPoint (PPTX)", xlsx:"Excel (XLSX)", docx:"Word (DOCX)", txt:"Teks (TXT)", csv:"CSV", zip:"ZIP/Arsip", mixed:"Campuran", other:"File" };
+// Tipe file yang dipratinjau lewat Google Docs Viewer, biar tampilannya seragam.
+const GOOGLE_VIEWER_TYPES = new Set(["pdf","pptx","xlsx","docx","csv"]);
 
 let state = { all: [], kelompok: null, subject: null };
 
@@ -465,16 +472,16 @@ function getDownloadUrl(item){
   if(!item) return '#';
   return item.drive ? item.drive.download : item.url;
 }
+function googleViewerSrc(url){
+  return "https://docs.google.com/viewer?url=" + encodeURIComponent(url) + "&embedded=true";
+}
+// Preview eksternal (tab baru): Drive pakai link aslinya, tipe dokumen kantoran + PDF
+// disamakan lewat Google Docs Viewer supaya tampilannya konsisten.
 function getExternalPreviewUrl(item){
   if(!item) return '#';
   if(item.drive) return item.url;
-  if(item.tipe === 'pptx' || item.tipe === 'xlsx' || item.tipe === 'docx' || item.tipe === 'csv'){
-    return googleViewerSrc(item.url);
-  }
+  if(GOOGLE_VIEWER_TYPES.has(item.tipe)) return googleViewerSrc(item.url);
   return item.url;
-}
-function googleViewerSrc(url){
-  return "https://docs.google.com/viewer?url=" + encodeURIComponent(url) + "&embedded=true";
 }
 function parseUrls(raw){
   return (raw||"").split(",").map(s => s.trim()).filter(Boolean);
@@ -630,15 +637,11 @@ function renderTasks(rebuildFilter){
   }
   grid.innerHTML = rows.map((r) => {
     const idx = state.all.indexOf(r);
-    const previewHtml = buildCardPreview(r);
-    const firstItem = r.items && r.items.length ? r.items[0] : null;
-    const downloadUrl = firstItem ? getDownloadUrl(firstItem) : '#';
-    const previewUrl = firstItem ? getExternalPreviewUrl(firstItem) : '#';
     return `
-      <div class="task-card">
+      <div class="task-card" data-task-idx="${idx}">
         <div class="task-preview">
           <span class="type-badge">${TYPE_ICONS[r.tipe]} ${TYPE_LABELS[r.tipe]}</span>
-          ${previewHtml}
+          ${buildCardPreview(r)}
         </div>
         <div class="task-body">
           <h5>${escapeHtml(r.judul)}</h5>
@@ -647,14 +650,37 @@ function renderTasks(rebuildFilter){
         </div>
         <div class="task-actions">
           <div class="action-row">
-            <a class="btn btn-gold" href="${escapeHtml(previewUrl)}" target="_blank" rel="noopener">🔗 Preview</a>
+            <button class="btn btn-gold" onclick="cardPreview(this)">🔗 Preview</button>
             <button class="btn btn-primary" onclick="openModal(${idx})">👁 Lihat</button>
           </div>
-          <a class="btn btn-ghost" href="${escapeHtml(downloadUrl)}" target="_blank" rel="noopener" download>⬇ Unduh</a>
+          <button class="btn btn-ghost" onclick="cardDownload(this)">⬇ Unduh</button>
         </div>
       </div>`;
   }).join('');
   setupAutoplayObserver();
+}
+
+// Cari item yang lagi aktif di carousel kartu (kalau file lebih dari satu),
+// supaya tombol Preview/Unduh selalu mengikuti slide yang sedang tampil.
+function activeItemForCard(cardEl, task){
+  const items = (task && task.items) || [];
+  if(items.length <= 1) return items[0] || null;
+  const track = cardEl.querySelector('[data-carousel]');
+  const activeSlide = track ? track.querySelector('.carousel-slide.active') : null;
+  const i = activeSlide ? parseInt(activeSlide.dataset.slide, 10) : 0;
+  return items[i] || items[0];
+}
+function cardPreview(btn){
+  const card = btn.closest('.task-card');
+  const r = state.all[parseInt(card.dataset.taskIdx, 10)];
+  const item = activeItemForCard(card, r);
+  if(item) window.open(getExternalPreviewUrl(item), '_blank', 'noopener');
+}
+function cardDownload(btn){
+  const card = btn.closest('.task-card');
+  const r = state.all[parseInt(card.dataset.taskIdx, 10)];
+  const item = activeItemForCard(card, r);
+  if(item) window.open(getDownloadUrl(item), '_blank', 'noopener');
 }
 
 function cardSlideMedia(item, judul){
@@ -734,17 +760,12 @@ function modalSlideContent(item, judul){
   if(item.tipe === 'audio'){
     return `<audio src="${escapeHtml(item.url)}" controls></audio>`;
   }
-  if(item.tipe === 'pdf'){
-    return `<iframe src="${escapeHtml(item.url)}"></iframe>`;
-  }
-  if(item.tipe === 'pptx' || item.tipe === 'xlsx' || item.tipe === 'docx'){
+  // PDF, Word, Excel, PowerPoint, CSV: seragam lewat Google Docs Viewer.
+  if(GOOGLE_VIEWER_TYPES.has(item.tipe)){
     return `<iframe src="${googleViewerSrc(item.url)}"></iframe>`;
   }
   if(item.tipe === 'txt'){
     return `<iframe src="${escapeHtml(item.url)}"></iframe>`;
-  }
-  if(item.tipe === 'csv'){
-    return `<iframe src="${googleViewerSrc(item.url)}"></iframe>`;
   }
   return `<div class="modal-fallback">Format file ini (${TYPE_LABELS[item.tipe]||'tidak dikenal'}) belum bisa dipratinjau langsung.<br><a href="${escapeHtml(item.url)}" target="_blank" rel="noopener">Buka / unduh file di tab baru →</a></div>`;
 }
@@ -757,7 +778,9 @@ function openModal(idx){
     `<b>${escapeHtml(r.mapel)}</b> · 🗓️ ${escapeHtml(r.tanggal)}<br>${escapeHtml(r.deskripsi)}`;
   const items = r.items && r.items.length ? r.items : [];
   const dl = document.getElementById('modal-download');
+  const pv = document.getElementById('modal-preview');
   dl.href = items[0] ? getDownloadUrl(items[0]) : '#';
+  pv.href = items[0] ? getExternalPreviewUrl(items[0]) : '#';
   const body = document.getElementById('modal-body');
   if(items.length === 0){
     body.innerHTML = `<div class="modal-fallback">Belum ada file yang ditautkan untuk tugas ini.</div>`;
@@ -769,7 +792,7 @@ function openModal(idx){
     }
   } else {
     const slides = items.map((it,i) => `
-      <div class="carousel-slide${i===0?' active':''}" data-slide="${i}" data-download="${escapeHtml(getDownloadUrl(it))}">
+      <div class="carousel-slide${i===0?' active':''}" data-slide="${i}" data-download="${escapeHtml(getDownloadUrl(it))}" data-preview="${escapeHtml(getExternalPreviewUrl(it))}">
         ${modalSlideContent(it, r.judul)}
         <span class="slide-badge">${TYPE_ICONS[it.tipe]} ${TYPE_LABELS[it.tipe]} · ${i+1}/${items.length}</span>
       </div>`).join('');
@@ -796,8 +819,11 @@ function modalCarouselMove(btn, dir){
   slides[cur].classList.remove('active'); if(dots[cur]) dots[cur].classList.remove('active');
   cur = (cur + dir + slides.length) % slides.length;
   slides[cur].classList.add('active'); if(dots[cur]) dots[cur].classList.add('active');
+  // Sinkronkan tombol Preview & Unduh di footer modal ke slide yang aktif sekarang.
   const dl = document.getElementById('modal-download');
+  const pv = document.getElementById('modal-preview');
   if(dl && slides[cur].dataset.download) dl.href = slides[cur].dataset.download;
+  if(pv && slides[cur].dataset.preview) pv.href = slides[cur].dataset.preview;
 }
 function closeModal(){
   const panel = document.querySelector('.modal-panel');
